@@ -58,7 +58,7 @@ public class AI {
         //manage countdown intervals.
         //we do not reset countdown here, only when puck hits
         if (countdown % AI_COUNTDOWN_INTERVAL == 0){
-            changeAIstrategies();
+            changeAIStrategies();
         }//end special changes
 
         //make countdown go down
@@ -79,7 +79,7 @@ public class AI {
             }
             //if above half court but below paddle height limit, track the puck
             else if (puck.getyPosition() > AirHockeyGame.HALF_COURT &&
-                    puck.getyPosition() < AirHockeyGame.GAME_HEIGHT - AirHockeyGame.PADDLE_HEIGHT_LIMIT){
+                    puck.getyPosition() < Globals.GAME_HEIGHT - AirHockeyGame.PADDLE_HEIGHT_LIMIT){
                 moveStrategyTrackPuck(puck);
             }
             //if in the hit area
@@ -126,10 +126,6 @@ public class AI {
         }
     }
 
-    public float getDifficulty() {
-        return difficulty;
-    }
-
     /**
      * Sets the difficulty.
      * Maximum difficulty is a 1
@@ -168,6 +164,10 @@ public class AI {
         isTop = top;
     }
 
+    public float getDifficulty() {
+        return difficulty;
+    }
+
 
     /**
      * Moves the AI paddle to the goal area
@@ -184,7 +184,10 @@ public class AI {
         paddle.update(moveX, moveY, true);
     }
 
-    private void changeAIstrategies(){
+    /**
+     * Changes the AI strategies, including behavior, velocity, etc.
+     */
+    private void changeAIStrategies(){
         //generate new threshold
         float variance = (float)(Math.random() - 0.5) * 60;
         if (isTop){
@@ -195,27 +198,27 @@ public class AI {
 
         //generate new strategy
         float strategyChange = rand.nextFloat();
-        if (AirHockeyGame.DEBUG){
+        if (Debug.AI){
             System.out.print(strategyChange + " ");
         }
         if (strategyChange > STRATEGY_GUARD_THRESHOLD * (1 - difficulty)){
             strategy = STRATEGY_GUARD;
-            if (AirHockeyGame.DEBUG){
+            if (Debug.AI){
                 System.out.println("GUARD | THRESHOLD " + STRATEGY_GUARD_THRESHOLD * (1 - difficulty));
             }
         } else if (strategyChange > STRATEGY_GUARD_FRONT_THRESHOLD * (1 - difficulty)){
             strategy = STRATEGY_GUARD_FRONT;
-            if (AirHockeyGame.DEBUG){
+            if (Debug.AI){
                 System.out.println("GUARD FRONT | THRESHOLD " + STRATEGY_GUARD_FRONT_THRESHOLD * (1 - difficulty));
             }
         } else if (strategyChange > STRATEGY_PASSIVE_THRESHOLD * (1 - difficulty)){
             strategy = STRATEGY_PASSIVE;
-            if (AirHockeyGame.DEBUG){
+            if (Debug.AI){
                 System.out.println("PASSIVE | THRESHOLD " + STRATEGY_PASSIVE_THRESHOLD * (1 - difficulty));
             }
         } else{
             strategy = STRATEGY_SLOW;
-            if (AirHockeyGame.DEBUG){
+            if (Debug.AI){
                 System.out.println("SLOW");
             }
         }

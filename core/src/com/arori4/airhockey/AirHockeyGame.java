@@ -14,7 +14,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.Shape;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +23,6 @@ import java.util.List;
  * Currently implements update loop in render loop
  */
 public final class AirHockeyGame extends ApplicationAdapter{
-
-	//Debug
-	public static final boolean DEBUG = true;
 
 	//Game Engine essentials
 	private SpriteBatch batch;
@@ -55,24 +51,22 @@ public final class AirHockeyGame extends ApplicationAdapter{
 	public static final String DIFFICULTY_TEXT = "DIFFICULTY";
 	public static final String SETTINGS_TEXT = "Settings";
 	public static final int MAX_GOALS = 7;
-	public static final int GAME_WIDTH = 720;
-	public static final int GAME_HEIGHT = 1280;
 	//Loading constants
 	public static final int LOADING_WIDTH = 150;
 	public static final int LOADING_HEIGHT = 800;
-	public static final int LOADING_X = GAME_WIDTH / 2 - LOADING_WIDTH / 2;
-	public static final int LOADING_Y = GAME_HEIGHT / 2 - LOADING_HEIGHT / 2;
+	public static final int LOADING_X = Globals.GAME_WIDTH / 2 - LOADING_WIDTH / 2;
+	public static final int LOADING_Y = Globals.GAME_HEIGHT / 2 - LOADING_HEIGHT / 2;
 	//Table measurement constants
-	public static final int PADDLE_HEIGHT_LIMIT = GAME_HEIGHT/4;
+	public static final int PADDLE_HEIGHT_LIMIT = Globals.GAME_HEIGHT/4;
 	public static final int GOAL_WIDTH = 300;
 	public static final int GOAL_HEIGHT = 150;
-	public static final int GOAL_LEFT_BOUNDS = GAME_WIDTH/2 - GOAL_WIDTH/2;
-	public static final int GOAL_RIGHT_BOUNDS = GAME_WIDTH/2 + GOAL_WIDTH/2;
+	public static final int GOAL_LEFT_BOUNDS = Globals.GAME_WIDTH/2 - GOAL_WIDTH/2;
+	public static final int GOAL_RIGHT_BOUNDS = Globals.GAME_WIDTH/2 + GOAL_WIDTH/2;
 	//AI Table measurement constants
-	public static final int GOAL_AREA_CENTER = GAME_WIDTH/2;
+	public static final int GOAL_AREA_CENTER = Globals.GAME_WIDTH/2;
 	public static final int GOAL_AREA_HEIGHT_P1 = GOAL_HEIGHT/2 + 20;
-	public static final int GOAL_AREA_HEIGHT_P2 = GAME_HEIGHT - GOAL_AREA_HEIGHT_P1;
-	public static final int HALF_COURT = GAME_HEIGHT/2;
+	public static final int GOAL_AREA_HEIGHT_P2 = Globals.GAME_HEIGHT - GOAL_AREA_HEIGHT_P1;
+	public static final int HALF_COURT = Globals.GAME_HEIGHT/2;
 	//Puck constants
 	public static final int INITIAL_PUCK_SPEED = 10;
 	public static final int NUM_PUCK_TRAILS = 30;
@@ -83,7 +77,7 @@ public final class AirHockeyGame extends ApplicationAdapter{
 	//Score constants
 	public static final int SCORE_X = 5;
 	public static final int SCORE_P1Y = 50;
-	public static final int SCORE_P2Y = GAME_HEIGHT - SCORE_P1Y + 20;
+	public static final int SCORE_P2Y = Globals.GAME_HEIGHT - SCORE_P1Y + 20;
 	public static final int SCORE_FONT_SIZE = 30;
 	//Menu Constants
 	public static final int MENU_LARGE_BUTTON_FONT_SIZE = 100;
@@ -109,8 +103,8 @@ public final class AirHockeyGame extends ApplicationAdapter{
 	//Title Constants
 	public static final int TITLE_TEXT_SIZE = 120;
 	public static final int TITLE_TEXT_BORDER_WIDTH = 7;
-	public static final int TITLE_TEXT_Y = GAME_HEIGHT - 80;
-	public static final int DIFFICULTY_TEXT_Y = GAME_HEIGHT - 70;
+	public static final int TITLE_TEXT_Y = Globals.GAME_HEIGHT - 80;
+	public static final int DIFFICULTY_TEXT_Y = Globals.GAME_HEIGHT - 70;
 	//Settings constants
 	public static final int SETTINGS_CENTER_BUTTON_WIDTH = 450;
 	public static final int SETTINGS_CENTER_BUTTON_HEIGHT = 200;
@@ -123,7 +117,7 @@ public final class AirHockeyGame extends ApplicationAdapter{
 			SETTINGS_SIDE_DIMENSION / 2;
 	public static final int SETTINGS_BACK_Y = 200;
 	public static final int SETTINGS_LEFT_X = 50;
-	public static final int SETTINGS_RIGHT_X = GAME_HEIGHT - SETTINGS_LEFT_X - SETTINGS_SIDE_DIMENSION;
+	public static final int SETTINGS_RIGHT_X = Globals.GAME_HEIGHT - SETTINGS_LEFT_X - SETTINGS_SIDE_DIMENSION;
 	//Color constants
 	public static final Color PUCK_COLOR = Color.GOLD;
 	public static final Color PLAYER1_COLOR = Color.RED;
@@ -231,7 +225,7 @@ public final class AirHockeyGame extends ApplicationAdapter{
 
 		//set up camera
 		camera = new OrthographicCamera();
-		camera.setToOrtho(false, GAME_WIDTH, GAME_HEIGHT);
+		camera.setToOrtho(false, Globals.GAME_WIDTH, Globals.GAME_HEIGHT);
 		camera.update();
 
 		//Drawing Assets
@@ -330,7 +324,7 @@ public final class AirHockeyGame extends ApplicationAdapter{
 			}
 
 			//debug
-			if (DEBUG){
+			if (Debug.LOADING){
 				System.out.println("STATE: " + state + " PROGRESS: " + progress);
 			}
 
@@ -359,7 +353,7 @@ public final class AirHockeyGame extends ApplicationAdapter{
 
 			//render title text
 			menuTitleFont.draw(batch, GAME_NAME,
-					GAME_WIDTH/2 - titleTextLayout.width/2, TITLE_TEXT_Y);
+					Globals.GAME_WIDTH/2 - titleTextLayout.width/2, TITLE_TEXT_Y);
 		}
 
 		//difficulty menu
@@ -372,7 +366,7 @@ public final class AirHockeyGame extends ApplicationAdapter{
 
 			//render title text
 			menuTitleFont.draw(batch, DIFFICULTY_TEXT,
-					GAME_WIDTH/2 - difficultyTextLayout.width/2, DIFFICULTY_TEXT_Y);
+					Globals.GAME_WIDTH/2 - difficultyTextLayout.width/2, DIFFICULTY_TEXT_Y);
 		}
 
 		//settings menu
@@ -390,7 +384,7 @@ public final class AirHockeyGame extends ApplicationAdapter{
 			settingsBackButton.draw(batch);
 
 			//render title text
-			menuTitleFont.draw(batch, SETTINGS_TEXT, GAME_WIDTH/2 - settingsTextLayout.width/2,
+			menuTitleFont.draw(batch, SETTINGS_TEXT, Globals.GAME_WIDTH/2 - settingsTextLayout.width/2,
 					DIFFICULTY_TEXT_Y);
 		}
 
@@ -403,7 +397,7 @@ public final class AirHockeyGame extends ApplicationAdapter{
 			batch.draw(tableImage, 0, 0);//draw table first before anything
 			batch.draw(goalImage, GOAL_LEFT_BOUNDS, 0,
 					GOAL_WIDTH, GOAL_HEIGHT);//draw bottom goal image
-			batch.draw(goalImage, GOAL_LEFT_BOUNDS, GAME_HEIGHT, //must be game height, reversing y direction draw
+			batch.draw(goalImage, GOAL_LEFT_BOUNDS, Globals.GAME_HEIGHT, //must be game height, reversing y direction draw
 					GOAL_WIDTH, -GOAL_HEIGHT);//draw top goal image in reverse
 			for (int index = 0; index < NUM_PUCK_TRAILS; index++){
 				list_puckTrails.get(index).draw(batch);
@@ -554,7 +548,7 @@ public final class AirHockeyGame extends ApplicationAdapter{
 						input1X = touchPos.x;
 						input1Y = touchPos.y;
 						input1Pressed = true;
-					} else if (touchPos.y > GAME_HEIGHT - PADDLE_HEIGHT_LIMIT) {//player 2, top
+					} else if (touchPos.y > Globals.GAME_HEIGHT - PADDLE_HEIGHT_LIMIT) {//player 2, top
 						input2X = touchPos.x;
 						input2Y = touchPos.y;
 						input2Pressed = true;
@@ -589,7 +583,7 @@ public final class AirHockeyGame extends ApplicationAdapter{
 
 				//puck collision with outer walls
 				//left/right ball collision
-				float wallXPosition = handleBounds(0, GAME_WIDTH, puck.getxPosition(), Puck.PUCK_RADIUS);
+				float wallXPosition = handleBounds(0, Globals.GAME_WIDTH, puck.getxPosition(), Puck.PUCK_RADIUS);
 				//change x velocity if there is a possible change
 				if (Math.abs(wallXPosition - puck.getxPosition()) > 0.0001) {
 					puck.setxVelocity(-puck.getxVelocity() * FRICTION);
@@ -597,7 +591,7 @@ public final class AirHockeyGame extends ApplicationAdapter{
 				}
 
 				//top/bottom ball collision
-				float wallYPosition = handleBounds(0, GAME_HEIGHT, puck.getyPosition(), Puck.PUCK_RADIUS);
+				float wallYPosition = handleBounds(0, Globals.GAME_HEIGHT, puck.getyPosition(), Puck.PUCK_RADIUS);
 				//make sure ball is not in the middle third
 				if (puck.getxPosition() > GOAL_LEFT_BOUNDS && puck.getxPosition() < GOAL_RIGHT_BOUNDS) {
 					wallYPosition = puck.getyPosition(); //set ball back to regular position if in goal area
@@ -800,12 +794,12 @@ public final class AirHockeyGame extends ApplicationAdapter{
 		}
 		showTrails = true;
 		//paddle 1
-		paddle1 = new Paddle(puckImage, GAME_WIDTH/2 - Paddle.PADDLE_RADIUS/2, 80);
-		paddle1.setBounds(0, GAME_WIDTH, PADDLE_HEIGHT_LIMIT, 0);
+		paddle1 = new Paddle(puckImage, Globals.GAME_WIDTH/2 - Paddle.PADDLE_RADIUS/2, 80);
+		paddle1.setBounds(0, Globals.GAME_WIDTH, PADDLE_HEIGHT_LIMIT, 0);
 		paddle1.setColor(PLAYER1_COLOR);
 		//paddle 2
-		paddle2 = new Paddle(puckImage, GAME_WIDTH/2 - Paddle.PADDLE_RADIUS/2, GAME_HEIGHT - 80);
-		paddle2.setBounds(0, GAME_WIDTH, GAME_HEIGHT, GAME_HEIGHT - PADDLE_HEIGHT_LIMIT);
+		paddle2 = new Paddle(puckImage, Globals.GAME_WIDTH/2 - Paddle.PADDLE_RADIUS/2, Globals.GAME_HEIGHT - 80);
+		paddle2.setBounds(0, Globals.GAME_WIDTH, Globals.GAME_HEIGHT, Globals.GAME_HEIGHT - PADDLE_HEIGHT_LIMIT);
 		paddle2.setColor(PLAYER2_COLOR);
 		//countdown objects
 		countdown1 = new PopupText(countdown1Image);
@@ -817,24 +811,24 @@ public final class AirHockeyGame extends ApplicationAdapter{
 		//final messages
 		gameFinalMessage = new PopupText(gameFinalImage);
 		gameFinalP1SucksMessage = new PopupText(gameFinalP1SucksImage);
-		gameFinalP1SucksMessage.setColor(PLAYER2_COLOR);
+		gameFinalP1SucksMessage.setForegroundColor(PLAYER2_COLOR);
 		gameFinalP2SucksMessage = new PopupText(gameFinalP2SucksImage);
-		gameFinalP2SucksMessage.setColor(PLAYER1_COLOR);
+		gameFinalP2SucksMessage.setForegroundColor(PLAYER1_COLOR);
 
 		//main menu buttons
 		//1 player button
 		menuPlayButton_1Player = new Button(menuButtonImage, "1 Player", menuFont);
 		menuPlayButton_1Player.setRelativeLocation(Position.CENTER, 0);
-		menuPlayButton_1Player.setyLocation(MENU_1_PLAYER_BUTTON_Y);
+		menuPlayButton_1Player.setY(MENU_1_PLAYER_BUTTON_Y);
 		//2 players button
 		menuPlayButton_2Player = new Button(menuButtonImage, "2 Players", menuFont);
 		menuPlayButton_2Player.setRelativeLocation(Position.CENTER, 0);
-		menuPlayButton_2Player.setyLocation(MENU_2_PLAYER_BUTTON_Y);
+		menuPlayButton_2Player.setY(MENU_2_PLAYER_BUTTON_Y);
 		//settings button
 		menuSettingsButton = new Button(menuButtonImage, SETTINGS_TEXT, menuFont);
 		menuSettingsButton.setWidth(MENU_SETTINGS_BUTTON_WIDTH);
 		menuSettingsButton.setHeight(MENU_SETTINGS_BUTTON_HEIGHT);
-		menuSettingsButton.setyLocation(MENU_SETTINGS_BUTTON_Y);
+		menuSettingsButton.setY(MENU_SETTINGS_BUTTON_Y);
 		menuSettingsButton.setRelativeLocation(Position.CENTER, 0);
 
 		//title text
@@ -852,61 +846,61 @@ public final class AirHockeyGame extends ApplicationAdapter{
 		menuDifficultyEasyButton = new Button(menuButtonImage, "Wimp", menuFont);
 		menuDifficultyEasyButton.setWidth(MENU_DIFFICULTY_EASY_BUTTON_WIDTH);
 		menuDifficultyEasyButton.setRelativeLocation(Position.CENTER, 0);
-		menuDifficultyEasyButton.setyLocation(MENU_DIFFICULTY_EASY_BUTTON_Y);
+		menuDifficultyEasyButton.setY(MENU_DIFFICULTY_EASY_BUTTON_Y);
 		//medium
 		menuDifficultyMediumButton = new Button(menuButtonImage, "Fickle", menuFont);
 		menuDifficultyMediumButton.setRelativeLocation(Position.CENTER, 0);
-		menuDifficultyMediumButton.setyLocation(MENU_DIFFICULTY_MEDIUM_BUTTON_Y);
+		menuDifficultyMediumButton.setY(MENU_DIFFICULTY_MEDIUM_BUTTON_Y);
 		//hard
 		menuDifficultyHardButton = new Button(menuButtonImage, "HARDCORE", menuFont);
 		menuDifficultyHardButton.setWidth(MENU_DIFFICULTY_HARD_BUTTON_WIDTH);
 		menuDifficultyHardButton.setRelativeLocation(Position.CENTER, 0);
-		menuDifficultyHardButton.setyLocation(MENU_DIFFICULTY_HARD_BUTTON_Y);
+		menuDifficultyHardButton.setY(MENU_DIFFICULTY_HARD_BUTTON_Y);
 
 		//settings buttons
 		settingsColorButton = new Button(menuButtonImage, "Color", menuFont);
 		settingsColorButton.setWidth(SETTINGS_CENTER_BUTTON_WIDTH);
 		settingsColorButton.setHeight(SETTINGS_CENTER_BUTTON_HEIGHT);
 		settingsColorButton.setRelativeLocation(Position.CENTER, 0);
-		settingsColorButton.setyLocation(SETTINGS_COLOR_Y);
+		settingsColorButton.setY(SETTINGS_COLOR_Y);
 
 		settingsColorLeftButton = new Button(settingsButtonImage, "", menuFont);
 		settingsColorLeftButton.setWidth(SETTINGS_SIDE_DIMENSION);
 		settingsColorLeftButton.setHeight(SETTINGS_SIDE_DIMENSION);
-		settingsColorLeftButton.setxLocation(SETTINGS_LEFT_X);
-		settingsColorLeftButton.setyLocation(SETTINGS_COLOR_EDIT_Y);
+		settingsColorLeftButton.setX(SETTINGS_LEFT_X);
+		settingsColorLeftButton.setY(SETTINGS_COLOR_EDIT_Y);
 
 		settingsColorRightButton = new Button(settingsButtonImage, "", menuFont);
 		settingsColorRightButton.setWidth(SETTINGS_SIDE_DIMENSION);
 		settingsColorRightButton.setHeight(SETTINGS_SIDE_DIMENSION);
-		settingsColorRightButton.setxLocation(SETTINGS_RIGHT_X);
-		settingsColorRightButton.setyLocation(SETTINGS_COLOR_EDIT_Y);
+		settingsColorRightButton.setX(SETTINGS_RIGHT_X);
+		settingsColorRightButton.setY(SETTINGS_COLOR_EDIT_Y);
 
 		//trails
 		settingsTrailsButton = new Button(menuButtonImage, "Trails", menuFont);
 		settingsTrailsButton.setWidth(SETTINGS_CENTER_BUTTON_WIDTH);
 		settingsTrailsButton.setHeight(SETTINGS_CENTER_BUTTON_HEIGHT);
 		settingsTrailsButton.setRelativeLocation(Position.CENTER, 0);
-		settingsTrailsButton.setyLocation(SETTINGS_TRAILS_Y);
+		settingsTrailsButton.setY(SETTINGS_TRAILS_Y);
 
 		settingsTrailsLeftButton = new Button(settingsButtonImage, "", menuFont);
 		settingsTrailsLeftButton.setWidth(SETTINGS_SIDE_DIMENSION);
 		settingsTrailsLeftButton.setHeight(SETTINGS_SIDE_DIMENSION);
-		settingsTrailsLeftButton.setxLocation(SETTINGS_LEFT_X);
-		settingsTrailsLeftButton.setyLocation(SETTINGS_TRAILS_EDIT_Y);
+		settingsTrailsLeftButton.setX(SETTINGS_LEFT_X);
+		settingsTrailsLeftButton.setY(SETTINGS_TRAILS_EDIT_Y);
 
 		settingsTrailsRightButton = new Button(settingsButtonImage, "", menuFont);
 		settingsTrailsRightButton.setWidth(SETTINGS_SIDE_DIMENSION);
 		settingsTrailsRightButton.setHeight(SETTINGS_SIDE_DIMENSION);
-		settingsTrailsRightButton.setxLocation(SETTINGS_RIGHT_X);
-		settingsTrailsRightButton.setyLocation(SETTINGS_TRAILS_EDIT_Y);
+		settingsTrailsRightButton.setX(SETTINGS_RIGHT_X);
+		settingsTrailsRightButton.setY(SETTINGS_TRAILS_EDIT_Y);
 
 		//back
 		settingsBackButton = new Button(menuButtonImage, "Back", menuFont);
 		settingsBackButton.setWidth(SETTINGS_CENTER_BUTTON_WIDTH);
 		settingsBackButton.setHeight(SETTINGS_CENTER_BUTTON_HEIGHT);
 		settingsBackButton.setRelativeLocation(Position.CENTER, 0);
-		settingsBackButton.setyLocation(SETTINGS_BACK_Y);
+		settingsBackButton.setY(SETTINGS_BACK_Y);
 
 		//ai
 		player1AI = new AI(0.75f, paddle1, false);
@@ -1011,24 +1005,24 @@ public final class AirHockeyGame extends ApplicationAdapter{
 				if (player1LastHit){
 					//own goal
 					stateGoalMessage = ownGoalMessage;
-					stateGoalMessage.setColor(PLAYER1_COLOR);
+					stateGoalMessage.setForegroundColor(PLAYER1_COLOR);
 					ownGoalSound.play();
 				} else{
 					//not own goal
 					stateGoalMessage = goalMessage;
-					stateGoalMessage.setColor(PLAYER2_COLOR);
+					stateGoalMessage.setForegroundColor(PLAYER2_COLOR);
 					goalSound.play();
 				}
 			} else{
 				if (!player1LastHit){
 					//own goal
 					stateGoalMessage = ownGoalMessage;
-					stateGoalMessage.setColor(PLAYER2_COLOR);
+					stateGoalMessage.setForegroundColor(PLAYER2_COLOR);
 					ownGoalSound.play();
 				} else{
 					//not own goal
 					stateGoalMessage = goalMessage;
-					stateGoalMessage.setColor(PLAYER1_COLOR);
+					stateGoalMessage.setForegroundColor(PLAYER1_COLOR);
 					goalSound.play();
 				}
 			}
@@ -1058,10 +1052,10 @@ public final class AirHockeyGame extends ApplicationAdapter{
 
 			//set color
 			if (player1Score >= MAX_GOALS){
-				gameFinalMessage.setColor(PLAYER1_COLOR);
+				gameFinalMessage.setForegroundColor(PLAYER1_COLOR);
 			}
 			else if (player2Score >= MAX_GOALS){
-				gameFinalMessage.setColor(PLAYER2_COLOR);
+				gameFinalMessage.setForegroundColor(PLAYER2_COLOR);
 			}
 		}
 		else if (gameState == STATE_SETTINGS){
@@ -1087,7 +1081,7 @@ public final class AirHockeyGame extends ApplicationAdapter{
 	 * @return - 0 if no goal, 1 if P1 scores into the top goal, 2 if P2 scores into the bottom goal
      */
 	private int isInGoal(){
-		if (puck.getyPosition() > GAME_HEIGHT){
+		if (puck.getyPosition() > Globals.GAME_HEIGHT){
 			return GOALP1;
 		} else if (puck.getyPosition() < 0){
 			return GOALP2;
@@ -1101,8 +1095,8 @@ public final class AirHockeyGame extends ApplicationAdapter{
 	 * Resets the puck location to the center and gives it a random velocity.
 	 */
 	private void resetPuck(){
-		puck.setxPosition(GAME_WIDTH/2);
-		puck.setyPosition(GAME_HEIGHT/2);
+		puck.setxPosition(Globals.GAME_WIDTH/2);
+		puck.setyPosition(Globals.GAME_HEIGHT/2);
 		puck.setxVelocity( ((float)Math.random() - 0.5f) * INITIAL_PUCK_SPEED);
 		puck.setyVelocity( ((float)Math.random() - 0.5f) * INITIAL_PUCK_SPEED);
 

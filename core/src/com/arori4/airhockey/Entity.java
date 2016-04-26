@@ -2,7 +2,6 @@ package com.arori4.airhockey;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 /**
  * Created by Christopher Cabreros on 19-Apr-16.
@@ -49,7 +48,7 @@ public abstract class Entity {
      * Draw method in abstract class is only for debug purposes.
      */
     public void draw(SpriteBatch context){
-        if (AirHockeyGame.DEBUG){
+        if (Debug.GUI){
 
         }
     }

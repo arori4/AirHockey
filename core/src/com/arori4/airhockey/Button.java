@@ -4,24 +4,16 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
 
 /**
  * Created by Christopher Cabreros on 21-Apr-16.
  * Defines a button for the GUI
  */
-public class Button {
+public class Button extends GUIComponent{
 
-    private Texture texture;
     private String text;
     private BitmapFont font;
     private GlyphLayout layout;
-
-    private int xLocation;
-    private int yLocation;
-
-    private int width;
-    private int height;
 
     /**
      * Creates a button with the texture and text
@@ -38,18 +30,16 @@ public class Button {
             System.err.println("ERROR: Button font is null");
             throw new NullPointerException("Button " + text + " font is null");
         }
-        texture = val;
+
+        setTexture(val);
         this.text = text;
         this.font = font;
         layout = new GlyphLayout();
         layout.setText(font, text);
 
-        //initialize location
-        xLocation = 0;
-        yLocation = 0;
         //initialize size
-        width = texture.getWidth();
-        height = texture.getHeight();
+        setWidth(getTexture().getWidth());
+        setHeight(getTexture().getHeight());
     }
 
 
@@ -62,11 +52,11 @@ public class Button {
      */
     public void setRelativeLocation(int xRel, int yRel) {
         if (xRel == Position.CENTER) {
-            xLocation = AirHockeyGame.GAME_WIDTH / 2 - width / 2;
+            setX(Globals.GAME_WIDTH / 2 - getWidth() / 2);
         }
 
         if (yRel == Position.CENTER) {
-            yLocation = AirHockeyGame.GAME_WIDTH / 2 + height / 2;
+            setY(Globals.GAME_WIDTH / 2 + getHeight() / 2);
         }
     }
 
@@ -76,11 +66,9 @@ public class Button {
      */
     public void draw(SpriteBatch context){
         //draw the button graphic
-        context.draw(texture, getxLocation(), getyLocation(), width, height);
+        context.draw(getTexture(), getX(), getY(), getWidth(), getHeight());
         //draw the font in the centered location
-        float textxLocation = getxLocation() + width/2 - layout.width/2;
-        float textyLocation = getyLocation() + height/2 + layout.height/2;
-        font.draw(context, text, textxLocation, textyLocation);
+        font.draw(context, text, getX() + getWidth()/2 - layout.width/2, getY() + getHeight()/2 + layout.height/2);
     }
 
 
@@ -91,39 +79,8 @@ public class Button {
      * @return - true if within button
      */
     public boolean isPressed(float xClick, float yClick){
-        return xClick > xLocation && xClick < xLocation + texture.getWidth() &&
-                yClick > yLocation && yClick < yLocation + texture.getHeight();
+        return xClick > getX() && xClick < getX() + getTexture().getWidth() &&
+                yClick > getY() && yClick < getY() + getTexture().getHeight();
     }
 
-    public int getWidth() {
-        return width;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
-    public int getxLocation() {
-        return xLocation;
-    }
-
-    public void setxLocation(int xLocation) {
-        this.xLocation = xLocation;
-    }
-
-    public int getyLocation() {
-        return yLocation;
-    }
-
-    public void setyLocation(int yLocation) {
-        this.yLocation = yLocation;
-    }
 }//end class Button
