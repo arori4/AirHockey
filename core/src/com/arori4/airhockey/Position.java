@@ -12,4 +12,7 @@ public class Position {
     public static final int LEFT = 4;
     public static final int RIGHT = 5;
 
+    public static final int LEFT_JUSTIFIED = 100;
+    public static final int RIGHT_JUSTIFIED = 101;
+
 }

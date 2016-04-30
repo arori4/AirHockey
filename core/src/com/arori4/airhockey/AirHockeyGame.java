@@ -1,15 +1,13 @@
 package com.arori4.airhockey;
 
-import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -22,22 +20,19 @@ import java.util.List;
  * Defines the game engine for the AirHockeyGame
  * Currently implements update loop in render loop
  */
-public final class AirHockeyGame extends ApplicationAdapter{
+public final class AirHockeyGame extends Game
+								implements ActionListener, Runnable{
 
 	//Game Engine essentials
-	private SpriteBatch batch;
-	private OrthographicCamera camera;
+	public SpriteBatch batch;
 	private AssetManager assetManager;
 
-	private ShapeRenderer shapeRenderer;
+	//Game specific variables
 	private static boolean isMultiplayer;
 	private Vector3 touchPos;
 	private boolean player1LastHit;
 	private int player1Score;
 	private int player2Score;
-	private GlyphLayout titleTextLayout;
-	private GlyphLayout difficultyTextLayout;
-	private GlyphLayout settingsTextLayout;
 	private boolean player1Goal; //player 1 scored
 	//Possible optimizations by declaring as instance variables
 	private float input1X, input1Y, input2X, input2Y;
@@ -51,6 +46,10 @@ public final class AirHockeyGame extends ApplicationAdapter{
 	public static final String DIFFICULTY_TEXT = "DIFFICULTY";
 	public static final String SETTINGS_TEXT = "Settings";
 	public static final int MAX_GOALS = 7;
+	//Strings
+	public static final String STRING_PLAYER_1_SUCKS = "PLAYER 1 SUCKS";
+	public static final String STRING_PLAYER_2_SUCKS = "PLAYER 2 SUCKS";
+	public static final String STRING_GOAL = "GOAL";
 	//Loading constants
 	public static final int LOADING_WIDTH = 150;
 	public static final int LOADING_HEIGHT = 800;
@@ -79,49 +78,11 @@ public final class AirHockeyGame extends ApplicationAdapter{
 	public static final int SCORE_P1Y = 50;
 	public static final int SCORE_P2Y = Globals.GAME_HEIGHT - SCORE_P1Y + 20;
 	public static final int SCORE_FONT_SIZE = 30;
-	//Menu Constants
-	public static final int MENU_LARGE_BUTTON_FONT_SIZE = 100;
-	public static final int MENU_LARGE_BUTTON_FONT_BORDER_SIZE = 3;
-	public static final int MENU_LARGE_BUTTON_WIDTH = 500;
-	public static final int MENU_LARGE_BUTTON_HEIGHT = 300;
-	public static final int MENU_1_PLAYER_BUTTON_Y = HALF_COURT;
-	public static final int MENU_2_PLAYER_BUTTON_Y = HALF_COURT - MENU_LARGE_BUTTON_HEIGHT - 20;
-	public static final int MENU_SETTINGS_BUTTON_WIDTH = 500;
-	public static final int MENU_SETTINGS_BUTTON_HEIGHT = 200;
-	public static final int MENU_SETTINGS_BUTTON_Y = 20;
-	//Difficulty Menu Constants
-	public static final int MENU_DIFFICULTY_HARD_BUTTON_WIDTH = 650;
-	public static final int MENU_DIFFICULTY_EASY_BUTTON_WIDTH = 400;
-	public static final int MENU_DIFFICULTY_HARD_BUTTON_Y = 20;
-	public static final int MENU_DIFFICULTY_MEDIUM_BUTTON_Y = MENU_DIFFICULTY_HARD_BUTTON_Y +
-			MENU_LARGE_BUTTON_HEIGHT + 20;
-	public static final int MENU_DIFFICULTY_EASY_BUTTON_Y = MENU_DIFFICULTY_MEDIUM_BUTTON_Y +
-			MENU_LARGE_BUTTON_HEIGHT + 20;
-	public static final float DIFFICULTY_EASY_VALUE = 0.45f;
-	public static final float DIFFICULTY_MEDIUM_VALUE = 0.70f;
-	public static final float DIFFICULTY_HARD_VALUE = 0.90f;
-	//Title Constants
-	public static final int TITLE_TEXT_SIZE = 120;
-	public static final int TITLE_TEXT_BORDER_WIDTH = 7;
-	public static final int TITLE_TEXT_Y = Globals.GAME_HEIGHT - 80;
-	public static final int DIFFICULTY_TEXT_Y = Globals.GAME_HEIGHT - 70;
-	//Settings constants
-	public static final int SETTINGS_CENTER_BUTTON_WIDTH = 450;
-	public static final int SETTINGS_CENTER_BUTTON_HEIGHT = 200;
-	public static final int SETTINGS_SIDE_DIMENSION = 100;
-	public static final int SETTINGS_COLOR_Y = 800;
-	public static final int SETTINGS_COLOR_EDIT_Y = SETTINGS_COLOR_Y + SETTINGS_CENTER_BUTTON_HEIGHT / 2 -
-			SETTINGS_SIDE_DIMENSION / 2;
-	public static final int SETTINGS_TRAILS_Y = 500;
-	public static final int SETTINGS_TRAILS_EDIT_Y = SETTINGS_TRAILS_Y + SETTINGS_CENTER_BUTTON_HEIGHT / 2 -
-			SETTINGS_SIDE_DIMENSION / 2;
-	public static final int SETTINGS_BACK_Y = 200;
-	public static final int SETTINGS_LEFT_X = 50;
-	public static final int SETTINGS_RIGHT_X = Globals.GAME_HEIGHT - SETTINGS_LEFT_X - SETTINGS_SIDE_DIMENSION;
 	//Color constants
 	public static final Color PUCK_COLOR = Color.GOLD;
 	public static final Color PLAYER1_COLOR = Color.RED;
 	public static final Color PLAYER2_COLOR = Color.BLUE;
+
 
 	//Game assets
 	//Images
@@ -129,20 +90,7 @@ public final class AirHockeyGame extends ApplicationAdapter{
 	private Texture puckTrailImage;
 	private Texture tableImage;
 	private Texture goalImage;
-	//Popup texts
-	private Texture countdown1Image;
-	private Texture countdown2Image;
-	private Texture countdown3Image;
-	private Texture countdownGoImage;
-	private Texture goalMessageImage;
-	private Texture ownGoalMessageImage;
-	private Texture gameFinalImage;
-	private Texture gameFinalP1SucksImage;
-	private Texture gameFinalP2SucksImage;
-	//menu assets
-	private Texture menuBackgroundImage;
-	private Texture menuButtonImage;
-	private Texture settingsButtonImage;
+	private Texture defaultComponent;
 
 	//Sounds
 	private Sound countdownNumberSound;
@@ -155,8 +103,6 @@ public final class AirHockeyGame extends ApplicationAdapter{
 
 	//Fonts
 	private BitmapFont scoreFont;
-	private BitmapFont menuFont;
-	private BitmapFont menuTitleFont;
 
 	//Game objects
 	private Puck puck;
@@ -164,6 +110,11 @@ public final class AirHockeyGame extends ApplicationAdapter{
 	//Paddles
 	private Paddle paddle1;
 	private Paddle paddle2;
+	//ai
+	private AI player1AI;
+	private AI player2AI;
+
+	//GUI Objects
 	//Popup Texts
 	private PopupText countdown1;
 	private PopupText countdown2;
@@ -175,24 +126,6 @@ public final class AirHockeyGame extends ApplicationAdapter{
 	private PopupText gameFinalMessage;
 	private PopupText gameFinalP1SucksMessage;
 	private PopupText gameFinalP2SucksMessage;
-	//Menu buttons
-	private Button menuPlayButton_1Player;
-	private Button menuPlayButton_2Player;
-	private Button menuDifficultyEasyButton;
-	private Button menuDifficultyMediumButton;
-	private Button menuDifficultyHardButton;
-	private Button menuSettingsButton;
-	//settings buttons
-	private Button settingsColorButton;
-	private Button settingsColorLeftButton;
-	private Button settingsColorRightButton;
-	private Button settingsTrailsButton;
-	private Button settingsTrailsLeftButton;
-	private Button settingsTrailsRightButton;
-	private Button settingsBackButton;
-	//ai
-	private AI player1AI;
-	private AI player2AI;
 
 	//States
 	private int state;
@@ -223,14 +156,8 @@ public final class AirHockeyGame extends ApplicationAdapter{
 		//create the asset manager for optimizations
 		assetManager = new AssetManager();
 
-		//set up camera
-		camera = new OrthographicCamera();
-		camera.setToOrtho(false, Globals.GAME_WIDTH, Globals.GAME_HEIGHT);
-		camera.update();
-
 		//Drawing Assets
 		batch = new SpriteBatch();
-		shapeRenderer = new ShapeRenderer();
 		touchPos = new Vector3();
 
 		//scores
@@ -248,27 +175,6 @@ public final class AirHockeyGame extends ApplicationAdapter{
 		parameter.color = com.badlogic.gdx.graphics.Color.BLACK;
 		parameter.borderColor = com.badlogic.gdx.graphics.Color.GOLD;
 		scoreFont = generator.generateFont(parameter);
-
-		//set up menu font
-		parameter.size = MENU_LARGE_BUTTON_FONT_SIZE;
-		parameter.color = com.badlogic.gdx.graphics.Color.WHITE;
-		parameter.borderColor = com.badlogic.gdx.graphics.Color.BLACK;
-		parameter.borderWidth = MENU_LARGE_BUTTON_FONT_BORDER_SIZE;
-		menuFont = generator.generateFont(parameter);
-
-		//set the generator for a new font
-		generator.dispose();
-		generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/impact.ttf"));
-
-		//set up menu title font
-		parameter.size = TITLE_TEXT_SIZE;
-		parameter.color = Color.SCARLET;
-		parameter.borderColor = Color.WHITE;
-		parameter.borderWidth = TITLE_TEXT_BORDER_WIDTH;
-		menuTitleFont = generator.generateFont(parameter);
-
-		//remove the generator as we don't need it anymore
-		generator.dispose();
 
 		//loading
 		setState(STATE_LOADING);
@@ -296,6 +202,7 @@ public final class AirHockeyGame extends ApplicationAdapter{
 			float progress = assetManager.getProgress();
 
 			//display progress
+			//TODO: transform into a regular GUIComponent
 			shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 			shapeRenderer.setProjectionMatrix(camera.combined);
 			shapeRenderer.setColor(Color.GREEN);
@@ -465,71 +372,10 @@ public final class AirHockeyGame extends ApplicationAdapter{
 		 * This is a temporary fix for an actual looop
 		 * TODO: add in an actual update loop
 		 */
-		//main menu
-		if (state == STATE_MAIN_MENU){
-			//iterate through the inputs
-			if (Gdx.input.isTouched() && countdown < 0) {//process input only if it is touched, and if countdown is lower
-				touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-				camera.unproject(touchPos);
-				if (menuPlayButton_1Player.isPressed(touchPos.x, touchPos.y)){
-					setState(STATE_MENU_AI_DIFFICULTY);
-					isMultiplayer = false;
-					buttonPressSound.play();
-				}
-				else if (menuPlayButton_2Player.isPressed(touchPos.x, touchPos.y)){
-					setState(STATE_COUNTDOWN);
-					isMultiplayer = true;
-					buttonPressSound.play();
-				}
-				else if (menuSettingsButton.isPressed(touchPos.x, touchPos.y)){
-					setState(STATE_SETTINGS);
-					buttonPressSound.play();
-				}
-			}
-			countdown--;
-		}
 
-		//difficulty menu
-		else if (state == STATE_MENU_AI_DIFFICULTY){
-			//iterate through the inputs
-			if (Gdx.input.isTouched() && countdown < 0) {//process input only if it is touched and countdown low
-				touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-				camera.unproject(touchPos);
-				if (menuDifficultyEasyButton.isPressed(touchPos.x, touchPos.y)){
-					setState(STATE_COUNTDOWN);
-					player2AI.setDifficulty(DIFFICULTY_EASY_VALUE);
-					buttonPressSound.play();
-				}
-				else if (menuDifficultyMediumButton.isPressed(touchPos.x, touchPos.y)){
-					setState(STATE_COUNTDOWN);
-					player2AI.setDifficulty(DIFFICULTY_MEDIUM_VALUE);
-					buttonPressSound.play();
-				}
-				else if (menuDifficultyHardButton.isPressed(touchPos.x, touchPos.y)){
-					setState(STATE_COUNTDOWN);
-					player2AI.setDifficulty(DIFFICULTY_HARD_VALUE);
-					buttonPressSound.play();
-				}
-			}
-			countdown--;
-		}
-
-		//settings menu
-		else if (state == STATE_SETTINGS){
-			//iterate through the inputs
-			if (Gdx.input.isTouched() && countdown < 0) {//process input only if it is touched and countdown low
-				touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-				camera.unproject(touchPos);
-				if (settingsBackButton.isPressed(touchPos.x, touchPos.y)){
-					setState(STATE_MAIN_MENU);
-					buttonPressSound.play();
-				}
-			}
-			countdown--;
-		}
 
 		//state play
-		else if (state == STATE_PLAY || state == STATE_COUNTDOWN || state == STATE_GOAL) {
+		if (state == STATE_PLAY || state == STATE_COUNTDOWN || state == STATE_GOAL) {
 			//handle input to move the paddles
 			input1X = paddle1.getxPosition();
 			input1Y = paddle1.getyPosition();
@@ -718,19 +564,11 @@ public final class AirHockeyGame extends ApplicationAdapter{
 		assetManager.load("puck_trail.png", Texture.class);
 		assetManager.load("table.png", Texture.class);
 		assetManager.load("goal.png", Texture.class);
-		//popup texts
-		assetManager.load("countdown_1.png", Texture.class);
-		assetManager.load("countdown_2.png", Texture.class);
-		assetManager.load("countdown_3.png", Texture.class);
-		assetManager.load("countdown_go.png", Texture.class);
-		assetManager.load("goalMessage.png", Texture.class);
-		assetManager.load("ownGoalMessage.png", Texture.class);
-		assetManager.load("game_final.png", Texture.class);
-		assetManager.load("game_final_p1_sucks.png", Texture.class);
-		assetManager.load("game_final_p2_sucks.png", Texture.class);
+		assetManager.load("template.png", Texture.class);
 		//menu button images
 		assetManager.load("menuBackground.png", Texture.class);
 		assetManager.load("menuButton.png", Texture.class);
+		assetManager.load("menuButtonPressed.png", Texture.class);
 		assetManager.load("triangle.png", Texture.class);
 
 		//load sounds
@@ -744,26 +582,16 @@ public final class AirHockeyGame extends ApplicationAdapter{
 	}
 
 
+	/**
+	 * Assigns loaded files into the game assets
+	 */
 	private void assignFiles(){
 		//all images
 		puckImage = assetManager.get("puck.png", Texture.class);
 		puckTrailImage = assetManager.get("puck_trail.png", Texture.class);
 		tableImage = assetManager.get("table.png", Texture.class);
 		goalImage = assetManager.get("goal.png", Texture.class);
-		//popup texts
-		countdown1Image = assetManager.get("countdown_1.png", Texture.class);
-		countdown2Image = assetManager.get("countdown_2.png", Texture.class);
-		countdown3Image = assetManager.get("countdown_3.png", Texture.class);
-		countdownGoImage = assetManager.get("countdown_go.png", Texture.class);
-		goalMessageImage = assetManager.get("goalMessage.png", Texture.class);
-		ownGoalMessageImage = assetManager.get("ownGoalMessage.png", Texture.class);
-		gameFinalImage = assetManager.get("game_final.png", Texture.class);
-		gameFinalP1SucksImage = assetManager.get("game_final_p1_sucks.png", Texture.class);
-		gameFinalP2SucksImage = assetManager.get("game_final_p2_sucks.png", Texture.class);
-		//menu button images
-		menuBackgroundImage = assetManager.get("menuBackground.png", Texture.class);
-		menuButtonImage = assetManager.get("menuButton.png", Texture.class);
-		settingsButtonImage = assetManager.get("triangle.png", Texture.class);
+		defaultComponent = assetManager.get("template.png", Texture.class);
 
 		//get sounds
 		countdownNumberSound = assetManager.get("sounds/440_short.wav", Sound.class);
@@ -793,6 +621,7 @@ public final class AirHockeyGame extends ApplicationAdapter{
 			list_puckTrails.add(newPuckTrail);
 		}
 		showTrails = true;
+
 		//paddle 1
 		paddle1 = new Paddle(puckImage, Globals.GAME_WIDTH/2 - Paddle.PADDLE_RADIUS/2, 80);
 		paddle1.setBounds(0, Globals.GAME_WIDTH, PADDLE_HEIGHT_LIMIT, 0);
@@ -801,6 +630,7 @@ public final class AirHockeyGame extends ApplicationAdapter{
 		paddle2 = new Paddle(puckImage, Globals.GAME_WIDTH/2 - Paddle.PADDLE_RADIUS/2, Globals.GAME_HEIGHT - 80);
 		paddle2.setBounds(0, Globals.GAME_WIDTH, Globals.GAME_HEIGHT, Globals.GAME_HEIGHT - PADDLE_HEIGHT_LIMIT);
 		paddle2.setColor(PLAYER2_COLOR);
+
 		//countdown objects
 		countdown1 = new PopupText(countdown1Image);
 		countdown2 = new PopupText(countdown2Image);
@@ -815,92 +645,7 @@ public final class AirHockeyGame extends ApplicationAdapter{
 		gameFinalP2SucksMessage = new PopupText(gameFinalP2SucksImage);
 		gameFinalP2SucksMessage.setForegroundColor(PLAYER1_COLOR);
 
-		//main menu buttons
-		//1 player button
-		menuPlayButton_1Player = new Button(menuButtonImage, "1 Player", menuFont);
-		menuPlayButton_1Player.setRelativeLocation(Position.CENTER, 0);
-		menuPlayButton_1Player.setY(MENU_1_PLAYER_BUTTON_Y);
-		//2 players button
-		menuPlayButton_2Player = new Button(menuButtonImage, "2 Players", menuFont);
-		menuPlayButton_2Player.setRelativeLocation(Position.CENTER, 0);
-		menuPlayButton_2Player.setY(MENU_2_PLAYER_BUTTON_Y);
-		//settings button
-		menuSettingsButton = new Button(menuButtonImage, SETTINGS_TEXT, menuFont);
-		menuSettingsButton.setWidth(MENU_SETTINGS_BUTTON_WIDTH);
-		menuSettingsButton.setHeight(MENU_SETTINGS_BUTTON_HEIGHT);
-		menuSettingsButton.setY(MENU_SETTINGS_BUTTON_Y);
-		menuSettingsButton.setRelativeLocation(Position.CENTER, 0);
 
-		//title text
-		titleTextLayout = new GlyphLayout();
-		titleTextLayout.setText(menuTitleFont, GAME_NAME);
-		//difficulty text
-		difficultyTextLayout = new GlyphLayout();
-		difficultyTextLayout.setText(menuTitleFont, DIFFICULTY_TEXT);
-		//settings text
-		settingsTextLayout = new GlyphLayout();
-		settingsTextLayout.setText(menuTitleFont, SETTINGS_TEXT);
-
-		//menu difficulty buttons
-		//easy
-		menuDifficultyEasyButton = new Button(menuButtonImage, "Wimp", menuFont);
-		menuDifficultyEasyButton.setWidth(MENU_DIFFICULTY_EASY_BUTTON_WIDTH);
-		menuDifficultyEasyButton.setRelativeLocation(Position.CENTER, 0);
-		menuDifficultyEasyButton.setY(MENU_DIFFICULTY_EASY_BUTTON_Y);
-		//medium
-		menuDifficultyMediumButton = new Button(menuButtonImage, "Fickle", menuFont);
-		menuDifficultyMediumButton.setRelativeLocation(Position.CENTER, 0);
-		menuDifficultyMediumButton.setY(MENU_DIFFICULTY_MEDIUM_BUTTON_Y);
-		//hard
-		menuDifficultyHardButton = new Button(menuButtonImage, "HARDCORE", menuFont);
-		menuDifficultyHardButton.setWidth(MENU_DIFFICULTY_HARD_BUTTON_WIDTH);
-		menuDifficultyHardButton.setRelativeLocation(Position.CENTER, 0);
-		menuDifficultyHardButton.setY(MENU_DIFFICULTY_HARD_BUTTON_Y);
-
-		//settings buttons
-		settingsColorButton = new Button(menuButtonImage, "Color", menuFont);
-		settingsColorButton.setWidth(SETTINGS_CENTER_BUTTON_WIDTH);
-		settingsColorButton.setHeight(SETTINGS_CENTER_BUTTON_HEIGHT);
-		settingsColorButton.setRelativeLocation(Position.CENTER, 0);
-		settingsColorButton.setY(SETTINGS_COLOR_Y);
-
-		settingsColorLeftButton = new Button(settingsButtonImage, "", menuFont);
-		settingsColorLeftButton.setWidth(SETTINGS_SIDE_DIMENSION);
-		settingsColorLeftButton.setHeight(SETTINGS_SIDE_DIMENSION);
-		settingsColorLeftButton.setX(SETTINGS_LEFT_X);
-		settingsColorLeftButton.setY(SETTINGS_COLOR_EDIT_Y);
-
-		settingsColorRightButton = new Button(settingsButtonImage, "", menuFont);
-		settingsColorRightButton.setWidth(SETTINGS_SIDE_DIMENSION);
-		settingsColorRightButton.setHeight(SETTINGS_SIDE_DIMENSION);
-		settingsColorRightButton.setX(SETTINGS_RIGHT_X);
-		settingsColorRightButton.setY(SETTINGS_COLOR_EDIT_Y);
-
-		//trails
-		settingsTrailsButton = new Button(menuButtonImage, "Trails", menuFont);
-		settingsTrailsButton.setWidth(SETTINGS_CENTER_BUTTON_WIDTH);
-		settingsTrailsButton.setHeight(SETTINGS_CENTER_BUTTON_HEIGHT);
-		settingsTrailsButton.setRelativeLocation(Position.CENTER, 0);
-		settingsTrailsButton.setY(SETTINGS_TRAILS_Y);
-
-		settingsTrailsLeftButton = new Button(settingsButtonImage, "", menuFont);
-		settingsTrailsLeftButton.setWidth(SETTINGS_SIDE_DIMENSION);
-		settingsTrailsLeftButton.setHeight(SETTINGS_SIDE_DIMENSION);
-		settingsTrailsLeftButton.setX(SETTINGS_LEFT_X);
-		settingsTrailsLeftButton.setY(SETTINGS_TRAILS_EDIT_Y);
-
-		settingsTrailsRightButton = new Button(settingsButtonImage, "", menuFont);
-		settingsTrailsRightButton.setWidth(SETTINGS_SIDE_DIMENSION);
-		settingsTrailsRightButton.setHeight(SETTINGS_SIDE_DIMENSION);
-		settingsTrailsRightButton.setX(SETTINGS_RIGHT_X);
-		settingsTrailsRightButton.setY(SETTINGS_TRAILS_EDIT_Y);
-
-		//back
-		settingsBackButton = new Button(menuButtonImage, "Back", menuFont);
-		settingsBackButton.setWidth(SETTINGS_CENTER_BUTTON_WIDTH);
-		settingsBackButton.setHeight(SETTINGS_CENTER_BUTTON_HEIGHT);
-		settingsBackButton.setRelativeLocation(Position.CENTER, 0);
-		settingsBackButton.setY(SETTINGS_BACK_Y);
 
 		//ai
 		player1AI = new AI(0.75f, paddle1, false);
@@ -986,17 +731,10 @@ public final class AirHockeyGame extends ApplicationAdapter{
 			state = STATE_COUNTDOWN;
 			//reset the countdown timer
 			countdown = COUNTDOWN_START;
-			countdown1.reset();
-			countdown2.reset();
-			countdown3.reset();
-			countdownGo.reset();
 		}
 		else if (gameState == STATE_GOAL){
 			//set state
 			state = STATE_GOAL;
-			//reset messages
-			goalMessage.reset();
-			ownGoalMessage.reset();
 			//set countdown
 			countdown = GOAL_COUNTDOWN_START;
 
@@ -1044,11 +782,6 @@ public final class AirHockeyGame extends ApplicationAdapter{
 			//set state
 			state = STATE_WIN;
 			countdown = GAME_FINAL_DURATION;
-
-			//reset assets
-			gameFinalMessage.reset();
-			gameFinalP1SucksMessage.reset();
-			gameFinalP2SucksMessage.reset();
 
 			//set color
 			if (player1Score >= MAX_GOALS){
@@ -1127,4 +860,15 @@ public final class AirHockeyGame extends ApplicationAdapter{
 	}
 
 
+	@Override
+	public void onItemClicked(String actionCommand) {
+
+
+
+	}
+
+	@Override
+	public void run() {
+
+	}
 }//end class AirHockeyGame

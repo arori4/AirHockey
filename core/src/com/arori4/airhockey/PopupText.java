@@ -1,63 +1,106 @@
 package com.arori4.airhockey;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 /**
  * Created by Christopher Cabreros on 20-Apr-16.
- * Defines a popup text
+ * Defines a popup text. A popup text will appear in the middle of the screen suddenly and then
+ * fade away.
+ * TODO: implement time for the text to stay opaque 100% for a while
  */
-public class PopupText extends GUIComponent{
+public class PopupText extends TextBox{
 
-    private Texture texture;
-    private static final int MAX_FADE  = 50;
-    private float current_fade = 0;
+    private static final int DEFAULT_MAX_FADE  = 50;
+
+    private float mMaxFadeValue;
+    private float mCurrentFadeValue;
+    private boolean mDraw;
+
 
     /**
-     * Creates a popup text with the texture specified
-     * @param val - texture to apply to popup text
+     * Creates a Popup Text.
+     * @param text -  text to draw
+     * @param font - font that is used to draw
      */
-    public PopupText(Texture val){
-        if (val == null){
-            System.err.println("ERROR: PopupText texture is null");
-            throw new NullPointerException("PopupText texture is null");
-        }
-        //set default values
-        texture = val;
-        setForegroundColor(new Color(1, 1, 1, 1));
+    public PopupText(String text, BitmapFont font) {
+        super(text, font);
+
+        //force the width to be the game width
+        setWidth(Globals.GAME_WIDTH);
+
+        //set default delay
+        mCurrentFadeValue = DEFAULT_MAX_FADE;
+
+        //place the popup text in the middle, after all relevant adjustments have been made
+        setX(Globals.GAME_WIDTH / 2.0f - getWidth() / 2.0f);
+        setY(Globals.GAME_HEIGHT / 2.0f - getHeight() / 2.0f);
     }
 
+
     /**
-     * Draws and updates the popup text
-     * @param context - SpriteBatch to draw into
-     * @param location - location index to draw text
+     * Draws the popup text
+     * @param context - batch to draw in
+     * @param parentX - parent X, invalid because this draws at the center
+     * @param parentY - parent Y, invalid because this draws at the center
      */
-    public void draw(SpriteBatch context, int location){
-        if (location == Position.CENTER){
+    @Override
+    @Deprecated
+    public void draw(SpriteBatch context, float parentX, float parentY) {
+        //invalidate the two inputs
+        parentX = parentY = 0;
+
+        //only draw when permitted by the game engine
+        if (mDraw) {
             //have the spriteBatch draw with transparency
-            Color oldColor = context.getColor();
-            context.setColor(getForegroundColor().r, getForegroundColor().g,
-                    getForegroundColor().b, current_fade/MAX_FADE);
+            setTextColor(new Color(getForegroundColor().r, getForegroundColor().g,
+                    getForegroundColor().b, mCurrentFadeValue / mMaxFadeValue));
 
-            context.draw(texture, Globals.GAME_WIDTH/2 - texture.getWidth()/2,
-                Globals.GAME_HEIGHT/2 - texture.getHeight()/2);
-
-            //reset color back
-            context.setColor(oldColor);
-        }
-
-        //fade
-        if (current_fade > 0){
-            current_fade--;
+            //now delegate to super class with new parent values of 0
+            super.draw(context, parentX, parentY);
         }
     }
+
 
     /**
-     * Resets the popup text
+     * Draws the popup text. Preferred method to use.
+     * @param context - sprite batch to draw to
      */
-    public void reset(){
-        current_fade = MAX_FADE;
+    public void draw(SpriteBatch context){
+        draw(context, 0, 0);
     }
 
+
+    @Override
+    /**
+     * Updates the popup text.
+     */
+    public void update() {
+        //fade
+        if (mDraw) {
+            mCurrentFadeValue--;
+        } else { //when done, no longer fade
+            mCurrentFadeValue = mMaxFadeValue;
+            mDraw = false;
+        }
+    }
+
+
+    /**
+     * Starts the popup text.
+     */
+    public void start(){
+        mDraw = true;
+        mCurrentFadeValue = mMaxFadeValue;
+    }
+
+
+    public float getMaxFadeValue() {
+        return mMaxFadeValue;
+    }
+
+    public void setMaxFadeValue(float maxFadeValue) {
+        mMaxFadeValue = maxFadeValue;
+    }
 }//end class PopupText
