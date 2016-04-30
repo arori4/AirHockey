@@ -1,18 +1,19 @@
 package com.arori4.airhockey;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 /**
  * Created by Christopher Cabreros on 22-Apr-16.
+ * Defines the PuckTrail. The puck trail is a group of entities drawn as the puck moves around.
  */
 public class PuckTrail extends Entity {
 
-    Texture texture;
+    private Texture texture;
     private float count;
     private boolean redraw;
-    public static final int PUCK_TRAIL_LENGTH = (int)(AirHockeyGame.NUM_PUCK_TRAILS * 1.5);
+    public static final int PUCK_TRAIL_LENGTH = (int)(GameScreen.NUM_PUCK_TRAILS_X * 1.5);
+
 
     /**
      * Creates an entity with a width and height
@@ -27,6 +28,7 @@ public class PuckTrail extends Entity {
         this.count = count;
         redraw = true;
     }
+
 
     /**
      * Updates the puck trail
@@ -43,16 +45,18 @@ public class PuckTrail extends Entity {
         }
     }
 
+
     /**
      * Draws the PuckTrail object
-     * @param context
+     * @param context - sprite batch to draw in
      */
     public void draw(SpriteBatch context){
         super.draw(context);
 
         //set the color to be fading based on the count of the puck
         setPreviousColor(context.getColor());
-        context.setColor(getColor().r, getColor().g, getColor().b, getColor().a * (count / PUCK_TRAIL_LENGTH));
+        context.setColor(getColor().r, getColor().g, getColor().b,
+                getColor().a * (count / PUCK_TRAIL_LENGTH));
 
         //set the radius to be a fraction based on puck trail length
         float radius = Puck.PUCK_RADIUS * count / PUCK_TRAIL_LENGTH;
@@ -66,6 +70,7 @@ public class PuckTrail extends Entity {
         context.setColor(getPreviousColor());
     }
 
+
     public boolean isRedraw() {
         return redraw;
     }
@@ -73,4 +78,6 @@ public class PuckTrail extends Entity {
     public void setRedraw(boolean redraw) {
         this.redraw = redraw;
     }
+
+
 }//end class PuckTrail

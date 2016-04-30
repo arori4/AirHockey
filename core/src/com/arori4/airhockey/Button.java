@@ -28,6 +28,10 @@ public class Button extends TextBox implements Pressable{
      */
     public Button(String text, BitmapFont font){
         super(text, font);
+
+        //start the button unpressed and not able to be pressed
+        mIsPressed = false;
+        clickCountdown = DEFAULT_CLICK_DELAY;
     }
 
 
@@ -37,17 +41,22 @@ public class Button extends TextBox implements Pressable{
      * @param context - SpriteBatch to draw with
      */
     public void draw(SpriteBatch context, float parentX, float parentY){
+//        //draw the new image if pressed
+//        if (mIsPressed){
+//            if (mPressedTexture != null){
+//                //set color to opaque
+//                context.setColor(Color.OPAQUE);
+//                context.draw(mPressedTexture, getX() + parentX, getY() + parentY,
+//                        getWidth(), getHeight());
+//            } else{
+//                System.err.println("ERROR: Button with action command " + mActionCommand + " does " +
+//                        "not have a background texture.");
+//            }
+//        }
+
+        //TODO: this will cover the other image, but must be here
         super.draw(context, parentX, parentY);
 
-        //draw the new image if pressed
-        if (mIsPressed){
-            if (mPressedTexture != null){
-                context.draw(mPressedTexture, getX() + parentX, getY() + parentY);
-            } else{
-                System.err.println("ERROR: Button with action command " + mActionCommand + " does " +
-                        "not have a background texture.");
-            }
-        }
     }
 
     /**
@@ -83,8 +92,8 @@ public class Button extends TextBox implements Pressable{
      * @param yClick - y location of press
      */
     public void isPressed(float xClick, float yClick){
-        mIsPressed = xClick > getX() && xClick < getX() + getTexture().getWidth() &&
-                yClick > getY() && yClick < getY() + getTexture().getHeight();
+        mIsPressed = xClick > getX() && xClick < getX() + getWidth() &&
+                yClick > getY() && yClick < getY() + getHeight();
     }
 
 

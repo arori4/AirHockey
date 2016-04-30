@@ -42,17 +42,21 @@ public class MainMenuScreen implements Screen, ActionListener {
 
     //Constants
     private static final int DEFAULT_DELAY = 30;
-    //Menu Constants
+
+    //Main Menu Constants
     public static final int LARGE_BUTTON_FONT_SIZE = 100;
     public static final int LARGE_BUTTON_FONT_BORDER_SIZE = 3;
     public static final int LARGE_BUTTON_WIDTH = 500;
     public static final int LARGE_BUTTON_HEIGHT = 300;
-    public static final int LARGE_BUTTON_CENTER = Globals.GAME_WIDTH / 2 - LARGE_BUTTON_WIDTH / 2;
-
+    public static final int LARGE_BUTTON_X = Globals.GAME_WIDTH / 2 - LARGE_BUTTON_WIDTH / 2;
     public static final int MENU_1_PLAYER_BUTTON_Y = Globals.GAME_HEIGHT / 2;
     public static final int MENU_2_PLAYER_BUTTON_Y =
             Globals.GAME_HEIGHT / 2 - LARGE_BUTTON_HEIGHT - 20;
     public static final int MENU_SETTINGS_Y = 20;
+    public static final int TITLE_TEXT_SIZE = 120;
+    public static final int TITLE_TEXT_BORDER_WIDTH = 7;
+    public static final int TITLE_TEXT_Y = Globals.GAME_HEIGHT - 240;
+    public static final int DIFFICULTY_TEXT_Y = Globals.GAME_HEIGHT - 70;
 
     //Difficulty Menu Constants
     public static final int DIFFICULTY_HARD_BUTTON_WIDTH = 650;
@@ -64,11 +68,6 @@ public class MainMenuScreen implements Screen, ActionListener {
     public static final int DIFFICULTY_EASY_BUTTON_Y =
             DIFFICULTY_MEDIUM_BUTTON_Y + LARGE_BUTTON_HEIGHT + 20;
 
-    //Title Constants
-    public static final int TITLE_TEXT_SIZE = 120;
-    public static final int TITLE_TEXT_BORDER_WIDTH = 7;
-    public static final int TITLE_TEXT_Y = Globals.GAME_HEIGHT - 80;
-    public static final int DIFFICULTY_TEXT_Y = Globals.GAME_HEIGHT - 70;
     //Settings constants
     public static final int SETTINGS_CENTER_BOX_WIDTH = 450;
     public static final int SETTINGS_CENTER_BOX_HEIGHT = 200;
@@ -126,8 +125,11 @@ public class MainMenuScreen implements Screen, ActionListener {
 
 
     @Override
+    /**
+     * Called when the screen is started
+     */
     public void show() {
-
+        mCurrentDelay = DEFAULT_DELAY;
     }
 
     @Override
@@ -148,6 +150,9 @@ public class MainMenuScreen implements Screen, ActionListener {
             System.err.println("ERROR: mCurrentMenu not assigned");
         }
 
+        //end the batch
+        mGame.batch.end();
+
         //call update loop
         update(delta);
     }
@@ -166,7 +171,14 @@ public class MainMenuScreen implements Screen, ActionListener {
         //check any touch events
         if (Gdx.input.isTouched() && mCurrentDelay < 0) {//process input only if it is touched, and if countdown is lower
             touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            mCamera.unproject(touchPos);
+
+            //press on the menu. this will press on all the buttons
             mCurrentMenu.isPressed(touchPos.x, touchPos.y);
+
+            if (Debug.GUI){
+                System.out.println("MainMenuScreen.java click event at " + touchPos.x + ", " + touchPos.y);
+            }
         }
     }
 
@@ -241,7 +253,7 @@ public class MainMenuScreen implements Screen, ActionListener {
 
         //Title Text
         TextBox titleText = new TextBox("EXTREME AIR HOCKEY", menuTitleFont);
-        titleText.setX(LARGE_BUTTON_CENTER);
+        titleText.setX(LARGE_BUTTON_X);
         titleText.setY(TITLE_TEXT_Y);
         titleText.setWidth(LARGE_BUTTON_WIDTH);
         titleText.setHeight(LARGE_BUTTON_HEIGHT);
@@ -251,33 +263,36 @@ public class MainMenuScreen implements Screen, ActionListener {
         Button p1Button = new Button("1 Player", menuFont);
         p1Button.setTexture(menuButtonTexture);
         p1Button.setPressedTexture(menuButtonPressedTexture);
-        p1Button.setX(LARGE_BUTTON_CENTER);
+        p1Button.setX(LARGE_BUTTON_X);
         p1Button.setY(MENU_1_PLAYER_BUTTON_Y);
         p1Button.setWidth(LARGE_BUTTON_WIDTH);
         p1Button.setHeight(LARGE_BUTTON_HEIGHT);
         p1Button.setActionCommand("1 Player");
+        p1Button.setListener(this);
         mMenuMain.addComponent(p1Button);
 
         //2 player button
         Button p2Button = new Button("2 Player", menuFont);
         p2Button.setTexture(menuButtonTexture);
         p2Button.setPressedTexture(menuButtonPressedTexture);
-        p2Button.setX(LARGE_BUTTON_CENTER);
+        p2Button.setX(LARGE_BUTTON_X);
         p2Button.setY(MENU_2_PLAYER_BUTTON_Y);
         p2Button.setWidth(LARGE_BUTTON_WIDTH);
         p2Button.setHeight(LARGE_BUTTON_HEIGHT);
         p2Button.setActionCommand("2 Player");
+        p2Button.setListener(this);
         mMenuMain.addComponent(p2Button);
 
         //settings button
         Button settingsButton = new Button("Settings", menuFont);
         settingsButton.setTexture(menuButtonTexture);
         settingsButton.setPressedTexture(menuButtonPressedTexture);
-        settingsButton.setX(LARGE_BUTTON_CENTER);
+        settingsButton.setX(LARGE_BUTTON_X);
         settingsButton.setY(MENU_SETTINGS_Y);
         settingsButton.setWidth(LARGE_BUTTON_WIDTH);
         settingsButton.setHeight(LARGE_BUTTON_HEIGHT);
         settingsButton.setActionCommand("Go To Settings");
+        settingsButton.setListener(this);
         mMenuMain.addComponent(settingsButton);
     }
 
@@ -294,7 +309,7 @@ public class MainMenuScreen implements Screen, ActionListener {
         TextBox titleText = new TextBox("DIFFICULTY", menuTitleFont);
         titleText.setWidth(LARGE_BUTTON_WIDTH);
         titleText.setHeight(LARGE_BUTTON_HEIGHT);
-        titleText.setX(LARGE_BUTTON_CENTER);
+        titleText.setX(LARGE_BUTTON_X);
         titleText.setY(DIFFICULTY_TEXT_Y);
         mMenuDifficulty.addComponent(titleText);
 
@@ -307,6 +322,7 @@ public class MainMenuScreen implements Screen, ActionListener {
         easyButton.setX(Globals.GAME_WIDTH / 2 - easyButton.getWidth() / 2);
         easyButton.setY(DIFFICULTY_EASY_BUTTON_Y);
         easyButton.setActionCommand("Easy Difficulty");
+        easyButton.setListener(this);
         mMenuDifficulty.addComponent(easyButton);
 
         //Medium button
@@ -318,6 +334,7 @@ public class MainMenuScreen implements Screen, ActionListener {
         mediumButton.setX(Globals.GAME_WIDTH / 2 - mediumButton.getWidth() / 2);
         mediumButton.setY(DIFFICULTY_MEDIUM_BUTTON_Y);
         mediumButton.setActionCommand("Medium Difficulty");
+        mediumButton.setListener(this);
         mMenuDifficulty.addComponent(mediumButton);
 
         //Hard button
@@ -329,6 +346,7 @@ public class MainMenuScreen implements Screen, ActionListener {
         hardButton.setX(Globals.GAME_WIDTH / 2 - hardButton.getWidth() / 2);
         hardButton.setY(DIFFICULTY_HARD_BUTTON_Y);
         hardButton.setActionCommand("Hard Difficulty");
+        hardButton.setListener(this);
         mMenuDifficulty.addComponent(hardButton);
     }
 
@@ -356,6 +374,7 @@ public class MainMenuScreen implements Screen, ActionListener {
         colorLeft.setX(SETTINGS_LEFT_X);
         colorLeft.setY(SETTINGS_COLOR_EDIT_Y);
         colorLeft.setActionCommand("Color Left");
+        colorLeft.setListener(this);
         mMenuSettings.addComponent(colorLeft);
 
         Button colorRight = new Button("", menuFont);
@@ -365,6 +384,7 @@ public class MainMenuScreen implements Screen, ActionListener {
         colorRight.setX(SETTINGS_RIGHT_X);
         colorRight.setY(SETTINGS_COLOR_EDIT_Y);
         colorRight.setActionCommand("Color Right");
+        colorRight.setListener(this);
         mMenuSettings.addComponent(colorRight);
 
         //trails
@@ -382,6 +402,7 @@ public class MainMenuScreen implements Screen, ActionListener {
         trailsLeft.setX(SETTINGS_LEFT_X);
         trailsLeft.setY(SETTINGS_TRAILS_EDIT_Y);
         trailsLeft.setActionCommand("Trails Left");
+        trailsLeft.setListener(this);
         mMenuSettings.addComponent(trailsLeft);
 
         Button trailsRight = new Button("", menuFont);
@@ -391,6 +412,7 @@ public class MainMenuScreen implements Screen, ActionListener {
         trailsRight.setX(SETTINGS_RIGHT_X);
         trailsRight.setY(SETTINGS_TRAILS_EDIT_Y);
         trailsRight.setActionCommand("Trails Right");
+        trailsRight.setListener(this);
         mMenuSettings.addComponent(trailsRight);
 
         //back button
@@ -402,6 +424,7 @@ public class MainMenuScreen implements Screen, ActionListener {
         backButton.setX(Globals.GAME_WIDTH / 2 - backButton.getWidth() / 2);
         backButton.setY(SETTINGS_BACK_Y);
         backButton.setActionCommand("Settings Back");
+        backButton.setListener(this);
         mMenuSettings.addComponent(backButton);
     }
 
@@ -413,9 +436,10 @@ public class MainMenuScreen implements Screen, ActionListener {
                     "actionCommand.");
         } else if (actionCommand.equals("1 Player")){
             mGame.isMultiplayer = false;
+            mCurrentMenu = mMenuDifficulty;
         } else if (actionCommand.equals("2 Player")){
             mGame.isMultiplayer = true;
-            mCurrentMenu = mMenuDifficulty;
+            mGame.setGame(0);
         } else if (actionCommand.equals("Go To Settings")){
             mCurrentMenu = mMenuSettings;
         } else if (actionCommand.equals("Easy Difficulty")){
@@ -430,6 +454,12 @@ public class MainMenuScreen implements Screen, ActionListener {
 
         //reset delay
         mCurrentDelay = DEFAULT_DELAY;
+
+        //debug
+        if (Debug.GUI && actionCommand != null){
+            System.out.println("MenuMainScreen.java button pressed: " + actionCommand +
+                    " at " + touchPos.x + ", " + touchPos.y);
+        }
     }
 
 

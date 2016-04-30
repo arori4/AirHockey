@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Vector3;
 
 import java.util.ArrayList;
@@ -91,7 +92,7 @@ public class GameScreen implements Screen {
     public static final int HALF_COURT = Globals.GAME_HEIGHT/2;
     //Puck constants
     public static final int INITIAL_PUCK_SPEED = 10;
-    public static final int NUM_PUCK_TRAILS = 30;
+    public static final int NUM_PUCK_TRAILS_X = 30;
     public static final float FRICTION = 0.85f;
     //Goal Constants
     public static final int GOALP1 = 1; //p1 gets puck into top goal
@@ -108,7 +109,6 @@ public class GameScreen implements Screen {
     public static final Color PLAYER2_COLOR = Color.BLUE;
 
     //Countdown assets
-    private int countdown;
     public static final int COUNTDOWN_START = 140;
     public static final int COUNTDOWN_INTERVAL = 40;
     public static final int GOAL_COUNTDOWN_START = 60;
@@ -121,8 +121,7 @@ public class GameScreen implements Screen {
     public static final int STATE_GOAL = 2;
     public static final int STATE_WIN = 3;
 
-    public GameScreen(final AirHockeyGame game, final AssetManager manager,
-                      BitmapFont sFont, BitmapFont ptFont){
+    public GameScreen(final AirHockeyGame game, final AssetManager manager){
         //assign variables
         mGame = game;
         mManager = manager;
@@ -152,10 +151,6 @@ public class GameScreen implements Screen {
         player1Score = 0;
         player2Score = 0;
 
-        //fonts bcuz butt
-        scoreFont = sFont;
-        popupTextFont = ptFont;
-
         setupFonts();
         setupAssets();
     }
@@ -170,7 +165,7 @@ public class GameScreen implements Screen {
         puck.setColor(PUCK_COLOR);
         resetPuck();
         //puck trails
-        for (int index = 0; index < NUM_PUCK_TRAILS; index++){
+        for (int index = 0; index < NUM_PUCK_TRAILS_X; index++){
             PuckTrail newPuckTrail = new PuckTrail(puckTrailTexture,
                     Puck.PUCK_RADIUS * 2, Puck.PUCK_RADIUS * 2,
                     PuckTrail.PUCK_TRAIL_LENGTH - index);
@@ -189,17 +184,27 @@ public class GameScreen implements Screen {
 
         //countdown objects
         countdown1 = new PopupText("1", popupTextFont);
+        countdown1.setTextColor(Color.BLACK);
+
         countdown2 = new PopupText("2", popupTextFont);
+        countdown2.setTextColor(Color.BLACK);
+
         countdown3 = new PopupText("3", popupTextFont);
+        countdown3.setTextColor(Color.BLACK);
+
         countdownGo = new PopupText("GO!", popupTextFont);
+        countdownGo.setTextColor(Color.BLACK);
+
         goalMessage = new PopupText("GOAL", popupTextFont);
+
         ownGoalMessage = new PopupText("OWN GOAL LOSER", popupTextFont);
+
         //final messages
         gameFinalMessage = new PopupText("GAME OVER", popupTextFont);
         gameFinalP1SucksMessage = new PopupText("PLAYER 1 SUCKS", popupTextFont);
-        gameFinalP1SucksMessage.setForegroundColor(PLAYER2_COLOR);
+        gameFinalP1SucksMessage.setTextColor(PLAYER2_COLOR);
         gameFinalP2SucksMessage = new PopupText("PLAYER 2 SUCKS", popupTextFont);
-        gameFinalP2SucksMessage.setForegroundColor(PLAYER1_COLOR);
+        gameFinalP2SucksMessage.setTextColor(PLAYER1_COLOR);
 
         //ai
         player1AI = new AI(paddle1, false);
@@ -208,16 +213,39 @@ public class GameScreen implements Screen {
 
 
     /**
-     * Sets up the font
+     * Sets up the fonts
      */
     private void setupFonts(){
+        //weird stuff
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+                Gdx.files.internal("fonts/arialuni.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter =
+                new FreeTypeFontGenerator.FreeTypeFontParameter();
 
+        //set up game font
+        parameter.size = 30;
+        parameter.color = com.badlogic.gdx.graphics.Color.BLACK;
+        scoreFont = generator.generateFont(parameter);
+
+        //set up popup text font
+        parameter.size = 250;
+        parameter.color = Color.WHITE;
+        popupTextFont = generator.generateFont(parameter);
+
+        //remove the generator as we don't need it anymore
+        generator.dispose();
     }
+
 
     @Override
+    /**
+     * Called when the game first starts
+     * Sets the game to countdown
+     */
     public void show() {
-
+        setState(STATE_COUNTDOWN);
     }
+
 
     @Override
     public void render(float delta) {
@@ -230,13 +258,16 @@ public class GameScreen implements Screen {
         mGame.batch.setProjectionMatrix(mCamera.combined);
         mGame.batch.begin();
 
+        //reset the color to white
+        mGame.batch.setColor(Color.WHITE);
+
         //render game components
         mGame.batch.draw(tableTexture, 0, 0);//draw table first before anything
         mGame.batch.draw(goalTexture, GOAL_LEFT_BOUNDS, 0,
                 GOAL_WIDTH, GOAL_HEIGHT);//draw bottom goal image
         mGame.batch.draw(goalTexture, GOAL_LEFT_BOUNDS, Globals.GAME_HEIGHT, //must be game height, reversing y direction draw
                 GOAL_WIDTH, -GOAL_HEIGHT);//draw top goal image in reverse
-        for (int index = 0; index < NUM_PUCK_TRAILS; index++) {
+        for (int index = 0; index < NUM_PUCK_TRAILS_X; index++) {
             list_puckTrails.get(index).draw(mGame.batch);
         }
         paddle1.draw(mGame.batch);
@@ -247,35 +278,30 @@ public class GameScreen implements Screen {
         scoreFont.draw(mGame.batch, ("P1 Score: " + player1Score), SCORE_X, SCORE_P1Y);
         scoreFont.draw(mGame.batch, ("P2 Score: " + player2Score), SCORE_X, SCORE_P2Y);
 
-        //game state mCurrentDelay
+        //game state countdown
         if (state == STATE_COUNTDOWN) {
-            if (mCurrentDelay == COUNTDOWN_START) {
-                countdownNumberSound.play();
-            } else if (mCurrentDelay > COUNTDOWN_START - COUNTDOWN_INTERVAL) {//first interval for 3
+            if (mCurrentDelay >= COUNTDOWN_START - COUNTDOWN_INTERVAL) {//first interval for 3
                 countdown3.draw(mGame.batch);
-            } else if (mCurrentDelay == COUNTDOWN_START - COUNTDOWN_INTERVAL) {
-                countdownNumberSound.play();
-            } else if (mCurrentDelay > COUNTDOWN_START - COUNTDOWN_INTERVAL * 2 && //second interval for 2
+            }
+            else if (mCurrentDelay >= COUNTDOWN_START - COUNTDOWN_INTERVAL * 2 && //second interval for 2
                     mCurrentDelay < COUNTDOWN_START - COUNTDOWN_INTERVAL) {
                 countdown2.draw(mGame.batch);
-            } else if (mCurrentDelay == COUNTDOWN_START - COUNTDOWN_INTERVAL * 2) {
-                countdownNumberSound.play();
-            } else if (mCurrentDelay > COUNTDOWN_START - COUNTDOWN_INTERVAL * 3 && //third interval for 1
+            }
+            else if (mCurrentDelay >= COUNTDOWN_START - COUNTDOWN_INTERVAL * 3 && //third interval for 1
                     mCurrentDelay < COUNTDOWN_START - COUNTDOWN_INTERVAL * 2) {
                 countdown1.draw(mGame.batch);
-            } else if (mCurrentDelay == COUNTDOWN_START - COUNTDOWN_INTERVAL * 3) {
-                countdownGoSound.play();
-            } else {
+            }
+            else {
                 countdownGo.draw(mGame.batch); //rest for the GO! sign
             }
         }
 
-        if (state == STATE_GOAL) {
+        else if (state == STATE_GOAL) {
             //draw the state goal message
             stateGoalMessage.draw(mGame.batch);
         }
 
-        if (state == STATE_WIN) {
+        else if (state == STATE_WIN) {
             //draw the messages based on time
             if (mCurrentDelay >= GAME_FINAL_DURATION / 2) {
                 gameFinalMessage.draw(mGame.batch);
@@ -290,7 +316,6 @@ public class GameScreen implements Screen {
             } else {
                 mGame.setMainMenu();
             }
-            mCurrentDelay--;
         }
     
 
@@ -307,6 +332,9 @@ public class GameScreen implements Screen {
      * @param delta - change in time
      */
     public void update(float delta){
+        //remove countdown universally
+        mCurrentDelay--;
+
         //handle input to move the paddles
         float input1X = paddle1.getxPosition();
         float input1Y = paddle1.getyPosition();
@@ -345,16 +373,68 @@ public class GameScreen implements Screen {
             paddle2.update(input2X, input2Y, input2Pressed);
         }
 
-        //state countdown
-        if (state == STATE_COUNTDOWN){
-            if (countdown < 0) {
-                state = STATE_PLAY;
+        //update the puckTrails
+        for (int index = 0; index < NUM_PUCK_TRAILS_X; index++){
+            PuckTrail curr = list_puckTrails.get(index);
+            curr.update();
+
+            //redraw puck if needed
+            if (curr.isRedraw()){
+                curr.setxPosition(puck.getxPosition());
+                curr.setyPosition(puck.getyPosition());
             }
-            countdown--;//decrement countdown after every interval
         }
 
-        //ONLY UPDATE DURING PLAY
-        if (state == STATE_PLAY) {
+        //state countdown
+        if (state == STATE_COUNTDOWN){
+            if (mCurrentDelay == COUNTDOWN_START) {
+                countdownNumberSound.play();
+                countdown3.start();
+                if (Debug.ENGINE){
+                    System.err.println("Countdown 3");
+                }
+            } else if (mCurrentDelay > COUNTDOWN_START - COUNTDOWN_INTERVAL) {//first interval for 3
+                countdown3.update();
+            }
+
+            else if (mCurrentDelay == COUNTDOWN_START - COUNTDOWN_INTERVAL) {
+                countdownNumberSound.play();
+                countdown2.start();System.out.println("HELLO 2");
+                if (Debug.ENGINE){
+                    System.err.println("Countdown 2");
+                }
+            } else if (mCurrentDelay > COUNTDOWN_START - COUNTDOWN_INTERVAL * 2 && //second interval for 2
+                    mCurrentDelay < COUNTDOWN_START - COUNTDOWN_INTERVAL) {
+                countdown2.update();
+            }
+
+            else if (mCurrentDelay == COUNTDOWN_START - COUNTDOWN_INTERVAL * 2) {
+                countdownNumberSound.play();
+                countdown1.start(); System.out.println("HELLO 1");
+                if (Debug.ENGINE){
+                    System.err.println("Countdown 1");
+                }
+            } else if (mCurrentDelay > COUNTDOWN_START - COUNTDOWN_INTERVAL * 3 && //third interval for 1
+                    mCurrentDelay < COUNTDOWN_START - COUNTDOWN_INTERVAL * 2) {
+                countdown1.update();
+            }
+
+            else if (mCurrentDelay == COUNTDOWN_START - COUNTDOWN_INTERVAL * 3) {
+                countdownGoSound.play();
+                countdownGo.start();
+                if (Debug.ENGINE){
+                    System.err.println("Countdown Go!");
+                }
+            } else {
+                countdownGo.update(); //rest for the GO! sign
+            }
+
+            if (mCurrentDelay < 0) {
+                setState(STATE_PLAY);
+            }
+        }
+
+        else if (state == STATE_PLAY) {
             //update the puck's movement
             puck.update();
 
@@ -414,11 +494,12 @@ public class GameScreen implements Screen {
         }//end state PLAY_GAME
 
         //evaluate win conditions
-        if (state == STATE_GOAL){
-            countdown--;
+        else if (state == STATE_GOAL){
+            //update the goal message to fade
+            stateGoalMessage.update();
 
             //go to state countdown if done
-            if (countdown < 0){
+            if (mCurrentDelay < 0){
                 //check for a win condition
                 if (player1Score >= MAX_GOALS || player2Score >= MAX_GOALS){
                     setState(STATE_WIN);
@@ -426,18 +507,6 @@ public class GameScreen implements Screen {
                 else{
                     setState(STATE_COUNTDOWN);
                 }
-            }
-        }
-
-        //update the puckTrails
-        //must happen after the puck is fully updated
-        //but must also happen regardless wither playing game or goal scored
-        for (int index = 0; index < NUM_PUCK_TRAILS; index++){
-            PuckTrail curr = list_puckTrails.get(index);
-            curr.update();
-            if (curr.isRedraw()){
-                curr.setxPosition(puck.getxPosition());
-                curr.setyPosition(puck.getyPosition());
             }
         }
     }
@@ -597,50 +666,54 @@ public class GameScreen implements Screen {
             //set state
             state = STATE_COUNTDOWN;
             //reset the countdown timer
-            countdown = COUNTDOWN_START;
+            mCurrentDelay = COUNTDOWN_START;
         } else if (gameState == STATE_GOAL){
             //set state
             state = STATE_GOAL;
             //set countdown
-            countdown = GOAL_COUNTDOWN_START;
+            mCurrentDelay = GOAL_COUNTDOWN_START;
 
             //display correct message color
             if (player1ScoredGoal){
                 if (player1LastHit){
                     //own goal
                     stateGoalMessage = ownGoalMessage;
-                    stateGoalMessage.setForegroundColor(PLAYER1_COLOR);
+                    stateGoalMessage.setTextColor(PLAYER1_COLOR);
+                    stateGoalMessage.start();
                     ownGoalSound.play();
                 } else{
                     //not own goal
                     stateGoalMessage = goalMessage;
-                    stateGoalMessage.setForegroundColor(PLAYER2_COLOR);
+                    stateGoalMessage.setTextColor(PLAYER2_COLOR);
+                    stateGoalMessage.start();
                     goalSound.play();
                 }
             } else{
                 if (!player1LastHit){
                     //own goal
                     stateGoalMessage = ownGoalMessage;
-                    stateGoalMessage.setForegroundColor(PLAYER2_COLOR);
+                    stateGoalMessage.setTextColor(PLAYER2_COLOR);
+                    stateGoalMessage.start();
                     ownGoalSound.play();
                 } else{
                     //not own goal
                     stateGoalMessage = goalMessage;
-                    stateGoalMessage.setForegroundColor(PLAYER1_COLOR);
+                    stateGoalMessage.setTextColor(PLAYER1_COLOR);
+                    stateGoalMessage.start();
                     goalSound.play();
                 }
             }
         } else if (gameState == STATE_WIN){
             //set state
             state = STATE_WIN;
-            countdown = GAME_FINAL_DURATION;
+            mCurrentDelay = GAME_FINAL_DURATION;
 
             //set color
             if (player1Score >= MAX_GOALS){
-                gameFinalMessage.setForegroundColor(PLAYER1_COLOR);
+                gameFinalMessage.setTextColor(PLAYER1_COLOR);
             }
             else if (player2Score >= MAX_GOALS){
-                gameFinalMessage.setForegroundColor(PLAYER2_COLOR);
+                gameFinalMessage.setTextColor(PLAYER2_COLOR);
             }
         } else{
             System.err.println("ERROR: GAME STATE " + gameState + " is an invalid state");

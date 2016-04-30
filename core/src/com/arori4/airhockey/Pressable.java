@@ -10,4 +10,6 @@ public interface Pressable {
 
     void isPressed(float xClick, float yClick);
 
+    void setListener(ActionListener listener);
+
 }

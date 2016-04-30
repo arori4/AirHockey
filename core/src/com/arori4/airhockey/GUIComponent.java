@@ -96,8 +96,15 @@ public abstract class GUIComponent {
         return mTexture;
     }
 
+
+    /**
+     * Sets the texture to the specified texture.
+     * Also sets the color to draw the texture without any disortions
+     * @param texture - texture to draw for the button
+     */
     public void setTexture(Texture texture) {
         mTexture = texture;
+        setForegroundColor(Color.WHITE);
     }
 
     public Color getForegroundColor() {

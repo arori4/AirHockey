@@ -16,7 +16,7 @@ android {
     }
     defaultConfig {
         applicationId "com.arori4.airhockey"
-        minSdkVersion 8
+        minSdkVersion 10
         targetSdkVersion 23
     }
 }

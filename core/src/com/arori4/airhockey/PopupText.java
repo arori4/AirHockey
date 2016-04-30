@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 public class PopupText extends TextBox{
 
     private static final int DEFAULT_MAX_FADE  = 50;
+    private static final int DEFAULT_HEIGHT = 300;
 
     private float mMaxFadeValue;
     private float mCurrentFadeValue;
@@ -29,13 +30,19 @@ public class PopupText extends TextBox{
 
         //force the width to be the game width
         setWidth(Globals.GAME_WIDTH);
+        setHeight(DEFAULT_HEIGHT);
 
         //set default delay
         mCurrentFadeValue = DEFAULT_MAX_FADE;
+        mMaxFadeValue = DEFAULT_MAX_FADE;
 
         //place the popup text in the middle, after all relevant adjustments have been made
         setX(Globals.GAME_WIDTH / 2.0f - getWidth() / 2.0f);
         setY(Globals.GAME_HEIGHT / 2.0f - getHeight() / 2.0f);
+
+        //set background color to transparent
+        setForegroundColor(Color.CLEAR);
+        setBorderColor(Color.CLEAR);
     }
 
 
@@ -54,8 +61,8 @@ public class PopupText extends TextBox{
         //only draw when permitted by the game engine
         if (mDraw) {
             //have the spriteBatch draw with transparency
-            setTextColor(new Color(getForegroundColor().r, getForegroundColor().g,
-                    getForegroundColor().b, mCurrentFadeValue / mMaxFadeValue));
+            setTextColor(new Color(getTextColor().r, getTextColor().g,
+                    getTextColor().b, mCurrentFadeValue / mMaxFadeValue));
 
             //now delegate to super class with new parent values of 0
             super.draw(context, parentX, parentY);

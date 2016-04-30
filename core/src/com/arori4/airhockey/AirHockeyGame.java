@@ -40,12 +40,8 @@ public final class AirHockeyGame extends Game{
 	//States
 	private int state;
 	public static final int STATE_LOADING = 0;
+	public static final int STATE_DONE = 1;
 
-	//Constants
-	public static final String GAME_NAME = "EXTREME AIR\n   HOCKEY";
-	public static final String DIFFICULTY_TEXT = "DIFFICULTY";
-	public static final String SETTINGS_TEXT = "Settings";
-	public static final int MAX_GOALS = 7;
 	//Loading constants
 	public static final int LOADING_WIDTH = 150;
 	public static final int LOADING_HEIGHT = 800;
@@ -56,24 +52,31 @@ public final class AirHockeyGame extends Game{
 
 	@Override
 	/**
-	 * Called once when the application is created
+	 * Called once when the application is created.
+	 * Other calls are located in render loop because they have to be done after objects are loaded.
 	 */
 	public void create () {
 		//create the asset manager for optimizations
 		assetManager = new AssetManager();
 
-		//create camera for the loading screen
+		//create camera  and shape renderer for the loading screen
 		mCamera = new OrthographicCamera();
 		mCamera.setToOrtho(false, Globals.GAME_WIDTH, Globals.GAME_HEIGHT);
+		mShapeRenderer = new ShapeRenderer();
 
 		//Drawing Assets
 		batch = new SpriteBatch();
 
 		//loading
 		setState(STATE_LOADING);
+		setupFonts();
 		loadFiles();
 	}
 
+
+	/**
+	 * Helper method to draw fonts
+	 */
 	private void setupFonts(){
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
 				Gdx.files.internal("fonts/arialuni.ttf"));
@@ -116,33 +119,20 @@ public final class AirHockeyGame extends Game{
 
 			//update
 			assetManager.update();
+			//finished settings
 			if (Math.abs(progress - 1) < 0.001) {
+
+				//set up the default texture
+				Texture defaultTexture = assetManager.get("template.png", Texture.class);
+				GUIComponent.DEFAULT_TEXTURE = defaultTexture;
+
+				//create new menus
 				mMainMenuScreen = new MainMenuScreen(this, assetManager);
-
-				//weird stuff
-				FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-						Gdx.files.internal("fonts/arialuni.ttf"));
-				FreeTypeFontGenerator.FreeTypeFontParameter parameter =
-						new FreeTypeFontGenerator.FreeTypeFontParameter();
-
-				//set up game font
-				parameter.size = 30;
-				parameter.color = com.badlogic.gdx.graphics.Color.BLACK;
-				BitmapFont scoreFont = generator.generateFont(parameter);
-
-				//set up popup text font
-				parameter.size = 250;
-				parameter.color = Color.WHITE;
-				BitmapFont popupTextFont = generator.generateFont(parameter);
-
-				mGameScreen = new GameScreen(this, assetManager, scoreFont, popupTextFont);
-
-				//remove the generator as we don't need it anymore
-				generator.dispose();
-
+				mGameScreen = new GameScreen(this, assetManager);
 
 				//set main menu now
 				setMainMenu();
+				setState(STATE_DONE);
 			}
 
 			//debug
@@ -242,6 +232,8 @@ public final class AirHockeyGame extends Game{
 	private void setState(int newState){
 		if (newState == STATE_LOADING){
 			state = newState;
+		} else if (newState == STATE_DONE){
+			state = STATE_DONE;
 		} else{
 			System.out.println("ERROR: State " + newState + " is not a valid state in " +
 			"file AirHockeyGame.java");

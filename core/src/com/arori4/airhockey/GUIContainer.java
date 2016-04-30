@@ -13,7 +13,7 @@ public abstract class GUIContainer extends GUIComponent implements Pressable{
 
     //list
     private List<GUIComponent> arrComponents;
-
+    private ActionListener mListener;
 
     /**
      * Constructor
@@ -51,7 +51,7 @@ public abstract class GUIContainer extends GUIComponent implements Pressable{
 
 
     /**
-     * Checks whether the button has been pressed
+     * Checks whether the container has been pressed
      * @param xClick - x location of press
      * @param yClick - y location of press
      */
@@ -61,9 +61,9 @@ public abstract class GUIContainer extends GUIComponent implements Pressable{
         for (int index = 0; index < numComponents; index++){
             GUIComponent nextComponent = arrComponents.get(index);
 
-            //delegate to any pressable
+            //delegate to any pressable. adjust for location of the container
             if (nextComponent instanceof Pressable){
-                ((Pressable) nextComponent).isPressed(xClick, yClick);
+                ((Pressable) nextComponent).isPressed(xClick + getX(), yClick + getY());
             }
         }
     }
@@ -80,6 +80,11 @@ public abstract class GUIContainer extends GUIComponent implements Pressable{
         if (component != null) {
             arrComponents.add(component);
         }
+    }
+
+
+    public void setListener(ActionListener listener){
+        mListener = listener;
     }
 
 

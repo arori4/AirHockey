@@ -38,7 +38,8 @@ public class TextBox extends GUIComponent {
 
         //set variables. setFont delegates to a nullptr check
         //set a default text color
-        setFont(font);
+        mLayout = new GlyphLayout(); //for safety. must be done before we set the font
+        mFont = font; //do not do call to other method right now TODO: fix this
         font.setColor(DEFAULT_TEXT_COLOR);
         mText = text;
 
@@ -46,7 +47,6 @@ public class TextBox extends GUIComponent {
         mTextAlignment = DEFAULT_ALIGNMENT;
 
         //create the custom layout
-        mLayout = new GlyphLayout(); //for safety, TODO delete this
         calibrateText(true);
 
         //make the text box transparent
@@ -64,13 +64,13 @@ public class TextBox extends GUIComponent {
         super.draw(context, parentX, parentY);
 
         //draw based on configuration
-        //TODO: verify this draws at center
         if (mTextAlignment == Position.CENTER) {
             mFont.draw(context, mText,
                     getX() + parentX,
-                    getY() + parentY,
+                    getY() + parentY + mLayout.height / 2 + getHeight() / 2,
                     getWidth(), 1, true);
         } else{
+            //error message
             System.err.println("ERROR: Text Alignment " + mTextAlignment + " for button " +
             mText + " is an invalid alignment.");
             System.err.println("Drawing in center by default.");
@@ -78,8 +78,9 @@ public class TextBox extends GUIComponent {
             //draw at center
             mFont.draw(context, mText,
                     getX() + parentX + getWidth() / 2.0f - mLayout.width / 2.0f,
-                    getY() + parentY + getHeight() / 2.0f - mLayout.height / 2.0f);
+                    getY() + parentY + getHeight() / 2.0f + mLayout.height / 2.0f);
         }
+
     }
 
     @Override
