@@ -89,6 +89,7 @@ public class MainMenuScreen implements Screen, ActionListener {
     public static final float AI_MEDIUM = 0.70f;
     public static final float AI_HARD = 0.90f;
 
+
     /**
      * Constructor
      * @param game - game to implement in
@@ -102,6 +103,7 @@ public class MainMenuScreen implements Screen, ActionListener {
         //set camera
         mCamera = new OrthographicCamera();
         mCamera.setToOrtho(false, Globals.GAME_WIDTH, Globals.GAME_HEIGHT);
+        touchPos = new Vector3();
 
         //menu button images
         menuBackgroundTexture = mManager.get("menuBackground.png", Texture.class);
@@ -131,7 +133,7 @@ public class MainMenuScreen implements Screen, ActionListener {
     @Override
     public void render(float delta) {
         //clear screen
-        Gdx.gl.glClearColor(0, 0, 0.2f, 1);
+        Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         //update and start spriteBatch
@@ -407,19 +409,21 @@ public class MainMenuScreen implements Screen, ActionListener {
     @Override
     public void onItemClicked(String actionCommand) {
         if (actionCommand == null){
-
+            System.err.println("ERROR: A button in MainMenuScreen.java has not been assigned an" +
+                    "actionCommand.");
         } else if (actionCommand.equals("1 Player")){
-
+            mGame.isMultiplayer = false;
         } else if (actionCommand.equals("2 Player")){
+            mGame.isMultiplayer = true;
             mCurrentMenu = mMenuDifficulty;
         } else if (actionCommand.equals("Go To Settings")){
             mCurrentMenu = mMenuSettings;
         } else if (actionCommand.equals("Easy Difficulty")){
-
+            mGame.setGame(AI_EASY);
         } else if (actionCommand.equals("Medium Difficulty")){
-
+            mGame.setGame(AI_MEDIUM);
         } else if (actionCommand.equals("Hard Difficulty")){
-
+            mGame.setGame(AI_HARD);
         } else if (actionCommand.equals("Settings Back")){
             mCurrentMenu = mMenuMain;
         }

@@ -4,6 +4,7 @@ import java.util.Random;
 
 /**
  * Created by Christopher Cabreros on 22-Apr-16.
+ * AI for puck behavior
  */
 public class AI {
 
@@ -29,7 +30,7 @@ public class AI {
     private float attackVelocity;
 
 
-    public AI(float difficulty, Paddle paddle, boolean isTop) {
+    public AI(Paddle paddle, boolean isTop) {
         setDifficulty(difficulty);
         this.paddle = paddle;
         this.isTop = isTop;
@@ -40,9 +41,9 @@ public class AI {
         rand = new Random();
 
         if (isTop){
-            threshold_height = AirHockeyGame.GOAL_AREA_HEIGHT_P2;
+            threshold_height = GameScreen.GOAL_AREA_HEIGHT_P2;
         } else{
-            threshold_height = AirHockeyGame.GOAL_AREA_HEIGHT_P1;
+            threshold_height = GameScreen.GOAL_AREA_HEIGHT_P1;
         }
     }
 
@@ -68,18 +69,18 @@ public class AI {
         //handle if top
         if (isTop){ //PLAYER 2
             //if lower than half court, revert to strategy
-            if (puck.getyPosition() < AirHockeyGame.HALF_COURT){
+            if (puck.getyPosition() < GameScreen.HALF_COURT){
                 if (strategy == STRATEGY_GUARD) {
-                    moveStrategyGuard(AirHockeyGame.GOAL_AREA_HEIGHT_P2, puck);
+                    moveStrategyGuard(GameScreen.GOAL_AREA_HEIGHT_P2, puck);
                 } else if (strategy == STRATEGY_GUARD_FRONT){
-                    moveStrategyGuardFront(AirHockeyGame.GOAL_AREA_HEIGHT_P2, puck);
+                    moveStrategyGuardFront(GameScreen.GOAL_AREA_HEIGHT_P2, puck);
                 } else{ //slow is not needed, become passive
                     paddle.update(moveX, moveY, false);
                 }
             }
             //if above half court but below paddle height limit, track the puck
-            else if (puck.getyPosition() > AirHockeyGame.HALF_COURT &&
-                    puck.getyPosition() < Globals.GAME_HEIGHT - AirHockeyGame.PADDLE_HEIGHT_LIMIT){
+            else if (puck.getyPosition() > GameScreen.HALF_COURT &&
+                    puck.getyPosition() < Globals.GAME_HEIGHT - GameScreen.PADDLE_HEIGHT_LIMIT){
                 moveStrategyTrackPuck(puck);
             }
             //if in the hit area
@@ -91,9 +92,9 @@ public class AI {
                 //otherwise revert to strategy
                 else{
                     if (strategy == STRATEGY_GUARD) {
-                        moveStrategyGuard(AirHockeyGame.GOAL_AREA_HEIGHT_P2, puck);
+                        moveStrategyGuard(GameScreen.GOAL_AREA_HEIGHT_P2, puck);
                     } else if (strategy == STRATEGY_GUARD_FRONT){
-                        moveStrategyGuardFront(AirHockeyGame.GOAL_AREA_HEIGHT_P2, puck);
+                        moveStrategyGuardFront(GameScreen.GOAL_AREA_HEIGHT_P2, puck);
                     } else if (strategy == STRATEGY_PASSIVE){
                         paddle.update(moveX, moveY, false);
                     }
@@ -175,7 +176,7 @@ public class AI {
      * TODO: have the puck move to the edge of the goal ... maybe a better defensive strategy
      */
     private void moveStrategyGuard(float yTarget, Puck puck){
-        float moveX = moveTowards(paddle.getxPosition(), AirHockeyGame.GOAL_AREA_CENTER,
+        float moveX = moveTowards(paddle.getxPosition(), GameScreen.GOAL_AREA_CENTER,
                 AI_GLOBAL_BASE_SPEED);
         float moveY = moveTowards(paddle.getyPosition(), yTarget,
                 AI_GLOBAL_BASE_SPEED);
@@ -191,9 +192,9 @@ public class AI {
         //generate new threshold
         float variance = (float)(Math.random() - 0.5) * 60;
         if (isTop){
-            threshold_height = AirHockeyGame.GOAL_AREA_HEIGHT_P2 + variance;
+            threshold_height = GameScreen.GOAL_AREA_HEIGHT_P2 + variance;
         } else{
-            threshold_height = AirHockeyGame.GOAL_AREA_HEIGHT_P1 + variance;
+            threshold_height = GameScreen.GOAL_AREA_HEIGHT_P1 + variance;
         }
 
         //generate new strategy
@@ -232,7 +233,7 @@ public class AI {
      * @param puck - puck
      */
     private void moveStrategyGuardFront(float yTarget, Puck puck){
-        float adjustMoveY = (AirHockeyGame.HALF_COURT - yTarget) / 3.5f;
+        float adjustMoveY = (GameScreen.HALF_COURT - yTarget) / 3.5f;
         moveStrategyGuard(yTarget + adjustMoveY, puck);
     }
 
