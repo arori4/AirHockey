@@ -31,7 +31,7 @@ public final class AirHockeyGame extends Game{
 
 	//Settings change variables
 	public boolean showTrails;
-	public Color trailColor;
+	public Color puckColor;
 	public boolean isMultiplayer;
 
 	//Loading fonts
@@ -66,6 +66,10 @@ public final class AirHockeyGame extends Game{
 
 		//Drawing Assets
 		batch = new SpriteBatch();
+
+		//Default Values
+		showTrails = true;
+		puckColor = Color.BLACK;
 
 		//loading
 		setState(STATE_LOADING);
@@ -123,8 +127,7 @@ public final class AirHockeyGame extends Game{
 			if (Math.abs(progress - 1) < 0.001) {
 
 				//set up the default texture
-				Texture defaultTexture = assetManager.get("template.png", Texture.class);
-				GUIComponent.DEFAULT_TEXTURE = defaultTexture;
+				GUIComponent.DEFAULT_TEXTURE = assetManager.get("template.png", Texture.class);
 
 				//create new menus
 				mMainMenuScreen = new MainMenuScreen(this, assetManager);
@@ -147,6 +150,11 @@ public final class AirHockeyGame extends Game{
 		this.setScreen(mMainMenuScreen);
 	}
 
+
+	/**
+	 * Starts the game with the given difficulty. Multiplayer settings set before
+	 * @param difficulty - difficulty to set
+     */
 	public void setGame(float difficulty){
 		if (!isMultiplayer){
 			mGameScreen.player2AI.setDifficulty(difficulty);
@@ -197,6 +205,7 @@ public final class AirHockeyGame extends Game{
 		batch.dispose();
 	}
 
+
 	/**
 	 * Helper method to load all the files
 	 * This will keep the create method tiny
@@ -213,6 +222,7 @@ public final class AirHockeyGame extends Game{
 		assetManager.load("menuButton.png", Texture.class);
 		assetManager.load("menuButtonPressed.png", Texture.class);
 		assetManager.load("triangle.png", Texture.class);
+		assetManager.load("triangleDark.png", Texture.class);
 
 		//load sounds
 		assetManager.load("sounds/440_short.wav", Sound.class);

@@ -25,6 +25,7 @@ public class TextBox extends GUIComponent {
     private BitmapFont mFont;
     private GlyphLayout mLayout;
     private int mTextAlignment;
+    private Color mColor;
 
 
     /**
@@ -40,6 +41,7 @@ public class TextBox extends GUIComponent {
         //set a default text color
         mLayout = new GlyphLayout(); //for safety. must be done before we set the font
         mFont = font; //do not do call to other method right now TODO: fix this
+        mColor = DEFAULT_TEXT_COLOR;
         font.setColor(DEFAULT_TEXT_COLOR);
         mText = text;
 
@@ -63,7 +65,8 @@ public class TextBox extends GUIComponent {
         //delegate to super class for the colors
         super.draw(context, parentX, parentY);
 
-        //draw based on configuration
+        //draw based on configuration and color
+        mFont.setColor(getTextColor());
         if (mTextAlignment == Position.CENTER) {
             mFont.draw(context, mText,
                     getX() + parentX,
@@ -155,10 +158,11 @@ public class TextBox extends GUIComponent {
     }
 
     public Color getTextColor() {
-        return mFont.getColor();
+        return mColor;
     }
 
     public void setTextColor(Color textColor) {
+        mColor = textColor;
         mFont.setColor(textColor);
     }
 }

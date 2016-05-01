@@ -13,7 +13,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 public class PopupText extends TextBox{
 
     private static final int DEFAULT_MAX_FADE  = 50;
-    private static final int DEFAULT_HEIGHT = 300;
+    private static final int DEFAULT_HEIGHT = 400;
 
     private float mMaxFadeValue;
     private float mCurrentFadeValue;
@@ -74,6 +74,7 @@ public class PopupText extends TextBox{
      * Draws the popup text. Preferred method to use.
      * @param context - sprite batch to draw to
      */
+    @SuppressWarnings("deprecation")
     public void draw(SpriteBatch context){
         draw(context, 0, 0);
     }
@@ -110,4 +111,6 @@ public class PopupText extends TextBox{
     public void setMaxFadeValue(float maxFadeValue) {
         mMaxFadeValue = maxFadeValue;
     }
+
+
 }//end class PopupText

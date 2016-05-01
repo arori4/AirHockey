@@ -30,7 +30,10 @@ public class MainMenuScreen implements Screen, ActionListener {
     private Menu mMenuMain;
     private Menu mMenuSettings;
     private Menu mMenuDifficulty;
-    
+    //Settings text boxes
+    private TextBox trailsTextBox;
+    private TextBox colorTextBox;
+
     //Fonts
     private BitmapFont menuFont;
     private BitmapFont menuTitleFont;
@@ -39,6 +42,9 @@ public class MainMenuScreen implements Screen, ActionListener {
     private Texture menuButtonTexture;
     private Texture menuButtonPressedTexture;
     private Texture settingsButtonTexture;
+    private Texture settingsButtonPressedTexture;
+    //Color list
+    private LinkedList<Color> list_colors;
 
     //Constants
     private static final int DEFAULT_DELAY = 30;
@@ -112,6 +118,7 @@ public class MainMenuScreen implements Screen, ActionListener {
         menuButtonTexture = mManager.get("menuButton.png", Texture.class);
         settingsButtonTexture = mManager.get("triangle.png", Texture.class);
         menuButtonPressedTexture = mManager.get("menuButtonPressed.png", Texture.class);
+        settingsButtonPressedTexture = mManager.get("triangleDark.png", Texture.class);
 
         //create all the assets
         setupFonts();
@@ -121,6 +128,21 @@ public class MainMenuScreen implements Screen, ActionListener {
 
         //set up default delay
         mCurrentDelay = DEFAULT_DELAY;
+
+        //add colors
+        list_colors = new LinkedList<Color>();
+        list_colors.insert(Color.BLACK);
+        list_colors.insert(Color.BROWN);
+        list_colors.insert(Color.RED);
+        list_colors.insert(Color.ORANGE);
+        list_colors.insert(Color.YELLOW);
+        list_colors.insert(Color.CHARTREUSE);
+        list_colors.insert(Color.GREEN);
+        list_colors.insert(Color.CORAL);
+        list_colors.insert(Color.BLUE);
+        list_colors.insert(Color.PURPLE);
+        list_colors.insert(Color.PINK);
+        list_colors.insert(Color.WHITE);
 
         //start the main screen
         mCurrentMenu = mMenuMain;
@@ -133,6 +155,7 @@ public class MainMenuScreen implements Screen, ActionListener {
      */
     public void show() {
         mCurrentDelay = DEFAULT_DELAY;
+        mCurrentMenu = mMenuMain;
     }
 
     @Override
@@ -149,6 +172,7 @@ public class MainMenuScreen implements Screen, ActionListener {
         mCamera.update();
         mGame.batch.setProjectionMatrix(mCamera.combined);
         mGame.batch.begin();
+        mGame.batch.setColor(Color.WHITE);
 
         //render the current menu, if it exists
         if (mCurrentMenu != null){
@@ -174,6 +198,22 @@ public class MainMenuScreen implements Screen, ActionListener {
         mCurrentMenu.update();
         //subtract currentDelay
         mCurrentDelay--;
+
+        //update puck trail toggle text
+        if (mGame.showTrails){
+            trailsTextBox.setTextColor(new Color(trailsTextBox.getTextColor().r,
+                    trailsTextBox.getTextColor().g,
+                    trailsTextBox.getTextColor().b,
+                    1));
+        } else{
+            trailsTextBox.setTextColor(new Color(trailsTextBox.getTextColor().r,
+                    trailsTextBox.getTextColor().g,
+                    trailsTextBox.getTextColor().b,
+                    0.3f));
+        }
+
+        //update the puck color
+        colorTextBox.setTextColor(mGame.puckColor);
 
         //check any touch events
         if (Gdx.input.isTouched() && mCurrentDelay < 0) {//process input only if it is touched, and if countdown is lower
@@ -375,7 +415,7 @@ public class MainMenuScreen implements Screen, ActionListener {
         mMenuSettings.addComponent(settingsText);
 
         //color buttons
-        TextBox colorTextBox = new TextBox("Color", menuFont);
+        colorTextBox = new TextBox("Color", menuFont);
         colorTextBox.setWidth(SETTINGS_CENTER_BOX_WIDTH);
         colorTextBox.setHeight(SETTINGS_CENTER_BOX_HEIGHT);
         colorTextBox.setX(Globals.GAME_WIDTH /2 - colorTextBox.getWidth() / 2);
@@ -384,6 +424,7 @@ public class MainMenuScreen implements Screen, ActionListener {
 
         Button colorLeft = new Button("", menuFont);
         colorLeft.setTexture(settingsButtonTexture);
+        colorLeft.setPressedTexture(settingsButtonPressedTexture);
         colorLeft.setWidth(SETTINGS_SIDE_DIMENSION);
         colorLeft.setHeight(SETTINGS_SIDE_DIMENSION);
         colorLeft.setX(SETTINGS_LEFT_X);
@@ -394,7 +435,8 @@ public class MainMenuScreen implements Screen, ActionListener {
 
         Button colorRight = new Button("", menuFont);
         colorRight.setTexture(settingsButtonTexture);
-        colorRight.setWidth(SETTINGS_SIDE_DIMENSION);
+        colorRight.setPressedTexture(settingsButtonPressedTexture);
+        colorRight.setWidth(-SETTINGS_SIDE_DIMENSION);
         colorRight.setHeight(SETTINGS_SIDE_DIMENSION);
         colorRight.setX(SETTINGS_RIGHT_X);
         colorRight.setY(SETTINGS_COLOR_EDIT_Y);
@@ -403,7 +445,7 @@ public class MainMenuScreen implements Screen, ActionListener {
         mMenuSettings.addComponent(colorRight);
 
         //trails
-        TextBox trailsTextBox = new Button("Trails", menuFont);
+        trailsTextBox = new Button("Trails", menuFont);
         trailsTextBox.setWidth(SETTINGS_CENTER_BOX_WIDTH);
         trailsTextBox.setHeight(SETTINGS_CENTER_BOX_HEIGHT);
         trailsTextBox.setX(Globals.GAME_WIDTH /2 - trailsTextBox.getWidth() / 2);
@@ -412,7 +454,8 @@ public class MainMenuScreen implements Screen, ActionListener {
 
         Button trailsLeft = new Button("", menuFont);
         trailsLeft.setTexture(settingsButtonTexture);
-        trailsLeft.setWidth(-SETTINGS_SIDE_DIMENSION);
+        trailsLeft.setPressedTexture(settingsButtonPressedTexture);
+        trailsLeft.setWidth(SETTINGS_SIDE_DIMENSION);
         trailsLeft.setHeight(SETTINGS_SIDE_DIMENSION);
         trailsLeft.setX(SETTINGS_LEFT_X);
         trailsLeft.setY(SETTINGS_TRAILS_EDIT_Y);
@@ -422,6 +465,7 @@ public class MainMenuScreen implements Screen, ActionListener {
 
         Button trailsRight = new Button("", menuFont);
         trailsRight.setTexture(settingsButtonTexture);
+        trailsRight.setPressedTexture(settingsButtonPressedTexture);
         trailsRight.setWidth(-SETTINGS_SIDE_DIMENSION);
         trailsRight.setHeight(SETTINGS_SIDE_DIMENSION);
         trailsRight.setX(SETTINGS_RIGHT_X);
@@ -465,6 +509,15 @@ public class MainMenuScreen implements Screen, ActionListener {
             mGame.setGame(AI_HARD);
         } else if (actionCommand.equals("Settings Back")){
             mCurrentMenu = mMenuMain;
+        }
+
+        else if (actionCommand.equals("Color Left")){
+            mGame.puckColor = (Color) list_colors.previous();
+        } else if (actionCommand.equals("Color Right")){
+            mGame.puckColor = (Color) list_colors.next();
+        }
+        else if (actionCommand.equals("Trails Left") || actionCommand.equals("Trails Right")){
+            mGame.showTrails = !mGame.showTrails;
         }
 
         //reset delay

@@ -25,6 +25,8 @@ public abstract class GUIComponent {
     private float mY;
     private float mWidth;
     private float mHeight;
+    private boolean mFlippedX;
+    private boolean mFlippedY;
 
     //border
     private float mBorderSize;
@@ -44,6 +46,8 @@ public abstract class GUIComponent {
         mWidth = 50;
         mHeight = 50;
         mBorderSize = DEFAULT_BORDER_SIZE;
+        mFlippedX = false;
+        mFlippedY = false;
 
         //check for default texture
         if (DEFAULT_TEXTURE == null){
@@ -64,24 +68,45 @@ public abstract class GUIComponent {
     public void draw(SpriteBatch context, float parentX, float parentY){
         //All components are responsible for changing their own color
 
+        //Create coordinates for drawing based on reversals
+        float xPosition;
+        float yPosition;
+        float width;
+        float height;
+        if (mFlippedX){
+            width = -mWidth;
+            xPosition = mX + mWidth;
+        } else{
+            width = mWidth;
+            xPosition = mX;
+        }
+
+        if (mFlippedY){
+            height = -mHeight;
+            yPosition = mY + mHeight;
+        } else{
+            height = mHeight;
+            yPosition = mY;
+        }
+
         //draw border if it exists
         if (mBorderSize != 0) {
             context.setColor(mBorderColor);
             context.draw(DEFAULT_TEXTURE,
-                    mX + parentX - mBorderSize / 2.0f, mY + parentY - mBorderSize / 2.0f,
-                    mWidth + mBorderSize, mHeight + mBorderSize);
+                    xPosition + parentX - mBorderSize / 2.0f, yPosition + parentY - mBorderSize / 2.0f,
+                    width + mBorderSize, height + mBorderSize);
         }
 
         //draw foreground, based on the color and whether the texture exists or not
         context.setColor(mForegroundColor);
         if (mTexture != null){
             context.draw(mTexture,
-                    mX + parentX, mY + parentY,
-                    mWidth, mHeight);
+                    xPosition + parentX, yPosition + parentY,
+                    width, height);
         } else{
             context.draw(DEFAULT_TEXTURE,
-                    mX + parentX, mY + parentY,
-                    mWidth, mHeight);
+                    xPosition + parentX, yPosition + parentY,
+                    width, height);
         }
     }
 
@@ -144,7 +169,13 @@ public abstract class GUIComponent {
     }
 
     public void setWidth(float width) {
-        mWidth = width;
+        if (width < 0) {
+            mWidth = -width;
+            mFlippedX = true;
+        } else {
+            mWidth = width;
+            mFlippedX = false;
+        }
     }
 
     public float getHeight() {
@@ -152,7 +183,13 @@ public abstract class GUIComponent {
     }
 
     public void setHeight(float height) {
-        mHeight = height;
+        if (height < 0) {
+            mHeight = -height;
+            mFlippedY = true;
+        } else {
+            mHeight = height;
+            mFlippedY = false;
+        }
     }
 
     public float getBorderSize() {

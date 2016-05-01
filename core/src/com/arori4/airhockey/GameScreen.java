@@ -104,7 +104,6 @@ public class GameScreen implements Screen {
     public static final int POPUP_TEXT_FONT_SIZE = 250;
     public static final int BIG_POPUP_TEXT_FONT_SIZE = 400;
     //Color constants
-    public static final Color PUCK_COLOR = Color.GOLD;
     public static final Color PLAYER1_COLOR = Color.RED;
     public static final Color PLAYER2_COLOR = Color.BLUE;
 
@@ -121,6 +120,12 @@ public class GameScreen implements Screen {
     public static final int STATE_GOAL = 2;
     public static final int STATE_WIN = 3;
 
+
+    /**
+     * Constructor
+     * @param game - game type that loads and manages this screen
+     * @param manager - asset manager with all necessary assets
+     */
     public GameScreen(final AirHockeyGame game, final AssetManager manager){
         //assign variables
         mGame = game;
@@ -149,6 +154,7 @@ public class GameScreen implements Screen {
         player1Score = 0;
         player2Score = 0;
 
+        //setup
         setupFonts();
         setupAssets();
     }
@@ -160,24 +166,27 @@ public class GameScreen implements Screen {
     private void setupAssets(){
         //puck
         puck = new Puck(puckTexture);
-        puck.setColor(PUCK_COLOR);
+        puck.setColor(mGame.puckColor);
         resetPuck();
         //puck trails
         for (int index = 0; index < NUM_PUCK_TRAILS_X; index++){
             PuckTrail newPuckTrail = new PuckTrail(puckTrailTexture,
                     Puck.PUCK_RADIUS * 2, Puck.PUCK_RADIUS * 2,
                     PuckTrail.PUCK_TRAIL_LENGTH - index);
-            newPuckTrail.setColor(PUCK_COLOR);
+            newPuckTrail.setColor(mGame.puckColor);
             list_puckTrails.add(newPuckTrail);
         }
 
         //paddle 1
-        paddle1 = new Paddle(puckTexture, Globals.GAME_WIDTH/2 - Paddle.PADDLE_RADIUS/2, 80);
+        paddle1 = new Paddle(puckTexture,
+                Globals.GAME_WIDTH/2 - Paddle.PADDLE_RADIUS/2, 80);
         paddle1.setBounds(0, Globals.GAME_WIDTH, PADDLE_HEIGHT_LIMIT, 0);
         paddle1.setColor(PLAYER1_COLOR);
         //paddle 2
-        paddle2 = new Paddle(puckTexture, Globals.GAME_WIDTH/2 - Paddle.PADDLE_RADIUS/2, Globals.GAME_HEIGHT - 80);
-        paddle2.setBounds(0, Globals.GAME_WIDTH, Globals.GAME_HEIGHT, Globals.GAME_HEIGHT - PADDLE_HEIGHT_LIMIT);
+        paddle2 = new Paddle(puckTexture,
+                Globals.GAME_WIDTH/2 - Paddle.PADDLE_RADIUS/2, Globals.GAME_HEIGHT - 80);
+        paddle2.setBounds(0, Globals.GAME_WIDTH, Globals.GAME_HEIGHT,
+                Globals.GAME_HEIGHT - PADDLE_HEIGHT_LIMIT);
         paddle2.setColor(PLAYER2_COLOR);
 
         //countdown objects
@@ -245,14 +254,25 @@ public class GameScreen implements Screen {
     @Override
     /**
      * Called when the game first starts
-     * Sets the game to countdown
+     * Sets the game to countdown and sets the puck trail colors
      */
     public void show() {
+        //set state
         setState(STATE_COUNTDOWN);
+
+        //set all the puck colors
+        puck.setColor(mGame.puckColor);
+        for (int index = 0; index < NUM_PUCK_TRAILS_X; index++){
+            PuckTrail nextPuck = list_puckTrails.get(index);
+            nextPuck.setColor(mGame.puckColor);
+        }
     }
 
 
     @Override
+    /**
+     * Render loop
+     */
     public void render(float delta) {
         //clear screen
         Gdx.gl.glClearColor(1, 1, 1, 1);
@@ -272,9 +292,15 @@ public class GameScreen implements Screen {
                 GOAL_WIDTH, GOAL_HEIGHT);//draw bottom goal image
         mGame.batch.draw(goalTexture, GOAL_LEFT_BOUNDS, Globals.GAME_HEIGHT, //must be game height, reversing y direction draw
                 GOAL_WIDTH, -GOAL_HEIGHT);//draw top goal image in reverse
-        for (int index = 0; index < NUM_PUCK_TRAILS_X; index++) {
-            list_puckTrails.get(index).draw(mGame.batch);
+
+        //render the puck trails, if allowed
+        if (mGame.showTrails) {
+            for (int index = 0; index < NUM_PUCK_TRAILS_X; index++) {
+                list_puckTrails.get(index).draw(mGame.batch);
+            }
         }
+
+        //render the puck and paddle
         paddle1.draw(mGame.batch);
         paddle2.draw(mGame.batch);
         puck.draw(mGame.batch);
@@ -337,6 +363,9 @@ public class GameScreen implements Screen {
      * @param delta - change in time
      */
     public void update(float delta){
+        //deprecate delta
+        delta = 0;
+
         //handle input to move the paddles
         float input1X = paddle1.getxPosition();
         float input1Y = paddle1.getyPosition();
@@ -375,15 +404,17 @@ public class GameScreen implements Screen {
             paddle2.update(input2X, input2Y, input2Pressed);
         }
 
-        //update the puckTrails
-        for (int index = 0; index < NUM_PUCK_TRAILS_X; index++){
-            PuckTrail curr = list_puckTrails.get(index);
-            curr.update();
+        //update the puckTrails, if shown
+        if (mGame.showTrails) {
+            for (int index = 0; index < NUM_PUCK_TRAILS_X; index++) {
+                PuckTrail curr = list_puckTrails.get(index);
+                curr.update();
 
-            //redraw puck if needed
-            if (curr.isRedraw()){
-                curr.setxPosition(puck.getxPosition());
-                curr.setyPosition(puck.getyPosition());
+                //redraw puck if needed
+                if (curr.isRedraw()) {
+                    curr.setxPosition(puck.getxPosition());
+                    curr.setyPosition(puck.getyPosition());
+                }
             }
         }
 
@@ -669,12 +700,14 @@ public class GameScreen implements Screen {
         if (gameState == STATE_PLAY){
             //set the state
             state = STATE_PLAY;
-        } else if (gameState == STATE_COUNTDOWN){
+        }
+        else if (gameState == STATE_COUNTDOWN){
             //set state
             state = STATE_COUNTDOWN;
             //reset the countdown timer
             mCurrentDelay = COUNTDOWN_START;
-        } else if (gameState == STATE_GOAL){
+        }
+        else if (gameState == STATE_GOAL){
             //set state
             state = STATE_GOAL;
             //set countdown
@@ -710,7 +743,8 @@ public class GameScreen implements Screen {
                     goalSound.play();
                 }
             }
-        } else if (gameState == STATE_WIN){
+        }
+        else if (gameState == STATE_WIN){
             //set state
             state = STATE_WIN;
             mCurrentDelay = GAME_FINAL_DURATION;
@@ -722,7 +756,11 @@ public class GameScreen implements Screen {
             else if (player2Score >= MAX_GOALS){
                 gameFinalMessage.setTextColor(PLAYER2_COLOR);
             }
-        } else{
+
+            //start the final message
+            gameFinalMessage.start();
+        }
+        else{
             System.err.println("ERROR: GAME STATE " + gameState + " is an invalid state");
         }
     }
