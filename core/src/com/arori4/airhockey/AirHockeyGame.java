@@ -75,7 +75,7 @@ public final class AirHockeyGame extends Game{
 
 
 	/**
-	 * Helper method to draw fonts
+	 * Helper method to draw the loading screen font
 	 */
 	private void setupFonts(){
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
@@ -85,7 +85,7 @@ public final class AirHockeyGame extends Game{
 
 		//set up game font
 		parameter.size = LOADING_FONT_SIZE;
-		parameter.color = com.badlogic.gdx.graphics.Color.BLACK;
+		parameter.color = com.badlogic.gdx.graphics.Color.WHITE;
 		mLoadingFont = generator.generateFont(parameter);
 	}
 

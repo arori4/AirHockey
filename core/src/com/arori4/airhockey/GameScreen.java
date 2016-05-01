@@ -50,11 +50,9 @@ public class GameScreen implements Screen {
     private Texture puckTrailTexture;
     private Texture tableTexture;
     private Texture goalTexture;
-    private Texture defaultComponent;
     //Sounds
     private Sound countdownNumberSound;
     private Sound countdownGoSound;
-    private Sound buttonPressSound;
     private Sound goalSound;
     private Sound ownGoalSound;
     private Sound puckPaddleCollideSound;
@@ -62,6 +60,7 @@ public class GameScreen implements Screen {
     //Fonts
     private BitmapFont scoreFont;
     private BitmapFont popupTextFont;
+    private BitmapFont bigPopupTextFont;
 
     //GUI Objects
     //Popup Texts
@@ -103,6 +102,7 @@ public class GameScreen implements Screen {
     public static final int SCORE_P2Y = Globals.GAME_HEIGHT - SCORE_P1Y + 20;
     public static final int SCORE_FONT_SIZE = 30;
     public static final int POPUP_TEXT_FONT_SIZE = 250;
+    public static final int BIG_POPUP_TEXT_FONT_SIZE = 400;
     //Color constants
     public static final Color PUCK_COLOR = Color.GOLD;
     public static final Color PLAYER1_COLOR = Color.RED;
@@ -137,11 +137,9 @@ public class GameScreen implements Screen {
         puckTrailTexture = mManager.get("puck_trail.png", Texture.class);
         tableTexture = mManager.get("table.png", Texture.class);
         goalTexture = mManager.get("goal.png", Texture.class);
-        defaultComponent = mManager.get("template.png", Texture.class);
         //all sounds
         countdownNumberSound = mManager.get("sounds/440_short.wav", Sound.class);
         countdownGoSound = mManager.get("sounds/880_short.wav", Sound.class);
-        buttonPressSound = mManager.get("sounds/button.wav", Sound.class);
         goalSound = mManager.get("sounds/goal.wav", Sound.class);
         ownGoalSound = mManager.get("sounds/ownGoal.wav", Sound.class);
         puckPaddleCollideSound = mManager.get("sounds/puckPaddleCollide.wav", Sound.class);
@@ -183,16 +181,16 @@ public class GameScreen implements Screen {
         paddle2.setColor(PLAYER2_COLOR);
 
         //countdown objects
-        countdown1 = new PopupText("1", popupTextFont);
+        countdown1 = new PopupText("1", bigPopupTextFont);
         countdown1.setTextColor(Color.BLACK);
 
-        countdown2 = new PopupText("2", popupTextFont);
+        countdown2 = new PopupText("2", bigPopupTextFont);
         countdown2.setTextColor(Color.BLACK);
 
-        countdown3 = new PopupText("3", popupTextFont);
+        countdown3 = new PopupText("3", bigPopupTextFont);
         countdown3.setTextColor(Color.BLACK);
 
-        countdownGo = new PopupText("GO!", popupTextFont);
+        countdownGo = new PopupText("GO!", bigPopupTextFont);
         countdownGo.setTextColor(Color.BLACK);
 
         goalMessage = new PopupText("GOAL", popupTextFont);
@@ -201,8 +199,10 @@ public class GameScreen implements Screen {
 
         //final messages
         gameFinalMessage = new PopupText("GAME OVER", popupTextFont);
+
         gameFinalP1SucksMessage = new PopupText("PLAYER 1 SUCKS", popupTextFont);
         gameFinalP1SucksMessage.setTextColor(PLAYER2_COLOR);
+
         gameFinalP2SucksMessage = new PopupText("PLAYER 2 SUCKS", popupTextFont);
         gameFinalP2SucksMessage.setTextColor(PLAYER1_COLOR);
 
@@ -223,14 +223,19 @@ public class GameScreen implements Screen {
                 new FreeTypeFontGenerator.FreeTypeFontParameter();
 
         //set up game font
-        parameter.size = 30;
+        parameter.size = SCORE_FONT_SIZE;
         parameter.color = com.badlogic.gdx.graphics.Color.BLACK;
         scoreFont = generator.generateFont(parameter);
 
         //set up popup text font
-        parameter.size = 250;
+        parameter.size = POPUP_TEXT_FONT_SIZE;
         parameter.color = Color.WHITE;
         popupTextFont = generator.generateFont(parameter);
+
+        //set up big popup text font
+        parameter.size = BIG_POPUP_TEXT_FONT_SIZE;
+        parameter.color = Color.WHITE;
+        bigPopupTextFont = generator.generateFont(parameter);
 
         //remove the generator as we don't need it anymore
         generator.dispose();
@@ -280,14 +285,14 @@ public class GameScreen implements Screen {
 
         //game state countdown
         if (state == STATE_COUNTDOWN) {
-            if (mCurrentDelay >= COUNTDOWN_START - COUNTDOWN_INTERVAL) {//first interval for 3
+            if (mCurrentDelay >= COUNTDOWN_START - COUNTDOWN_INTERVAL) {
                 countdown3.draw(mGame.batch);
             }
-            else if (mCurrentDelay >= COUNTDOWN_START - COUNTDOWN_INTERVAL * 2 && //second interval for 2
+            else if (mCurrentDelay >= COUNTDOWN_START - COUNTDOWN_INTERVAL * 2 &&
                     mCurrentDelay < COUNTDOWN_START - COUNTDOWN_INTERVAL) {
                 countdown2.draw(mGame.batch);
             }
-            else if (mCurrentDelay >= COUNTDOWN_START - COUNTDOWN_INTERVAL * 3 && //third interval for 1
+            else if (mCurrentDelay >= COUNTDOWN_START - COUNTDOWN_INTERVAL * 3 &&
                     mCurrentDelay < COUNTDOWN_START - COUNTDOWN_INTERVAL * 2) {
                 countdown1.draw(mGame.batch);
             }
@@ -332,9 +337,6 @@ public class GameScreen implements Screen {
      * @param delta - change in time
      */
     public void update(float delta){
-        //remove countdown universally
-        mCurrentDelay--;
-
         //handle input to move the paddles
         float input1X = paddle1.getxPosition();
         float input1Y = paddle1.getyPosition();
@@ -399,7 +401,7 @@ public class GameScreen implements Screen {
 
             else if (mCurrentDelay == COUNTDOWN_START - COUNTDOWN_INTERVAL) {
                 countdownNumberSound.play();
-                countdown2.start();System.out.println("HELLO 2");
+                countdown2.start();
                 if (Debug.ENGINE){
                     System.err.println("Countdown 2");
                 }
@@ -410,7 +412,7 @@ public class GameScreen implements Screen {
 
             else if (mCurrentDelay == COUNTDOWN_START - COUNTDOWN_INTERVAL * 2) {
                 countdownNumberSound.play();
-                countdown1.start(); System.out.println("HELLO 1");
+                countdown1.start();
                 if (Debug.ENGINE){
                     System.err.println("Countdown 1");
                 }
@@ -509,6 +511,10 @@ public class GameScreen implements Screen {
                 }
             }
         }
+
+        //remove countdown universally after everything
+        mCurrentDelay--;
+
     }
 
     @Override
@@ -535,6 +541,7 @@ public class GameScreen implements Screen {
     public void dispose() {
         scoreFont.dispose();
         popupTextFont.dispose();
+        bigPopupTextFont.dispose();
     }
 
 

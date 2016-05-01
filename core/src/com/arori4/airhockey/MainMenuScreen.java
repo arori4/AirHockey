@@ -47,16 +47,18 @@ public class MainMenuScreen implements Screen, ActionListener {
     public static final int LARGE_BUTTON_FONT_SIZE = 100;
     public static final int LARGE_BUTTON_FONT_BORDER_SIZE = 3;
     public static final int LARGE_BUTTON_WIDTH = 500;
-    public static final int LARGE_BUTTON_HEIGHT = 300;
+    public static final int LARGE_BUTTON_HEIGHT = 250;
     public static final int LARGE_BUTTON_X = Globals.GAME_WIDTH / 2 - LARGE_BUTTON_WIDTH / 2;
     public static final int MENU_1_PLAYER_BUTTON_Y = Globals.GAME_HEIGHT / 2;
     public static final int MENU_2_PLAYER_BUTTON_Y =
             Globals.GAME_HEIGHT / 2 - LARGE_BUTTON_HEIGHT - 20;
-    public static final int MENU_SETTINGS_Y = 20;
     public static final int TITLE_TEXT_SIZE = 120;
     public static final int TITLE_TEXT_BORDER_WIDTH = 7;
-    public static final int TITLE_TEXT_Y = Globals.GAME_HEIGHT - 240;
-    public static final int DIFFICULTY_TEXT_Y = Globals.GAME_HEIGHT - 70;
+    public static final int TITLE_TEXT_Y = Globals.GAME_HEIGHT - 320;
+    public static final int MENU_SETTINGS_WIDTH = 400;
+    public static final int MENU_SETTINGS_HEIGHT = 200;
+    public static final int MENU_SETTINGS_X = Globals.GAME_WIDTH / 2 - MENU_SETTINGS_WIDTH / 2;
+    public static final int MENU_SETTINGS_Y = 20;
 
     //Difficulty Menu Constants
     public static final int DIFFICULTY_HARD_BUTTON_WIDTH = 650;
@@ -67,6 +69,7 @@ public class MainMenuScreen implements Screen, ActionListener {
             DIFFICULTY_HARD_BUTTON_Y + LARGE_BUTTON_HEIGHT + 20;
     public static final int DIFFICULTY_EASY_BUTTON_Y =
             DIFFICULTY_MEDIUM_BUTTON_Y + LARGE_BUTTON_HEIGHT + 20;
+    public static final int DIFFICULTY_TEXT_Y = Globals.GAME_HEIGHT - 320;
 
     //Settings constants
     public static final int SETTINGS_CENTER_BOX_WIDTH = 450;
@@ -81,7 +84,7 @@ public class MainMenuScreen implements Screen, ActionListener {
     public static final int SETTINGS_BACK_Y = 200;
     public static final int SETTINGS_LEFT_X = 50;
     public static final int SETTINGS_RIGHT_X =
-            Globals.GAME_HEIGHT - SETTINGS_LEFT_X - SETTINGS_SIDE_DIMENSION;
+            Globals.GAME_WIDTH - SETTINGS_LEFT_X - SETTINGS_SIDE_DIMENSION;
 
     //AI Values
     public static final float AI_EASY = 0.45f;
@@ -133,6 +136,10 @@ public class MainMenuScreen implements Screen, ActionListener {
     }
 
     @Override
+    /**
+     * Renders the game
+     * @param delta - the amount of time that has passed
+     */
     public void render(float delta) {
         //clear screen
         Gdx.gl.glClearColor(1, 1, 1, 1);
@@ -160,7 +167,7 @@ public class MainMenuScreen implements Screen, ActionListener {
 
     /**
      * Separate update loop
-     * @param delta - time distance. not used
+     * @param delta - time distance. not used, but put here for consistency
      */
     public void update(float delta){
         //update the current menu
@@ -253,9 +260,9 @@ public class MainMenuScreen implements Screen, ActionListener {
 
         //Title Text
         TextBox titleText = new TextBox("EXTREME AIR HOCKEY", menuTitleFont);
-        titleText.setX(LARGE_BUTTON_X);
+        titleText.setX(0);
         titleText.setY(TITLE_TEXT_Y);
-        titleText.setWidth(LARGE_BUTTON_WIDTH);
+        titleText.setWidth(Globals.GAME_WIDTH);
         titleText.setHeight(LARGE_BUTTON_HEIGHT);
         mMenuMain.addComponent(titleText);
 
@@ -287,10 +294,10 @@ public class MainMenuScreen implements Screen, ActionListener {
         Button settingsButton = new Button("Settings", menuFont);
         settingsButton.setTexture(menuButtonTexture);
         settingsButton.setPressedTexture(menuButtonPressedTexture);
-        settingsButton.setX(LARGE_BUTTON_X);
+        settingsButton.setX(MENU_SETTINGS_X);
         settingsButton.setY(MENU_SETTINGS_Y);
-        settingsButton.setWidth(LARGE_BUTTON_WIDTH);
-        settingsButton.setHeight(LARGE_BUTTON_HEIGHT);
+        settingsButton.setWidth(MENU_SETTINGS_WIDTH);
+        settingsButton.setHeight(MENU_SETTINGS_HEIGHT);
         settingsButton.setActionCommand("Go To Settings");
         settingsButton.setListener(this);
         mMenuMain.addComponent(settingsButton);
@@ -307,9 +314,9 @@ public class MainMenuScreen implements Screen, ActionListener {
 
         //Title Text
         TextBox titleText = new TextBox("DIFFICULTY", menuTitleFont);
-        titleText.setWidth(LARGE_BUTTON_WIDTH);
+        titleText.setWidth(Globals.GAME_WIDTH);
         titleText.setHeight(LARGE_BUTTON_HEIGHT);
-        titleText.setX(LARGE_BUTTON_X);
+        titleText.setX(0);
         titleText.setY(DIFFICULTY_TEXT_Y);
         mMenuDifficulty.addComponent(titleText);
 
@@ -359,6 +366,14 @@ public class MainMenuScreen implements Screen, ActionListener {
         mMenuSettings = new Menu();
         mMenuSettings.setTexture(menuBackgroundTexture);
 
+        //Settings Text
+        TextBox settingsText = new TextBox("SETTINGS", menuTitleFont);
+        settingsText.setWidth(Globals.GAME_WIDTH);
+        settingsText.setHeight(LARGE_BUTTON_HEIGHT);
+        settingsText.setX(0);
+        settingsText.setY(DIFFICULTY_TEXT_Y);
+        mMenuSettings.addComponent(settingsText);
+
         //color buttons
         TextBox colorTextBox = new TextBox("Color", menuFont);
         colorTextBox.setWidth(SETTINGS_CENTER_BOX_WIDTH);
@@ -397,7 +412,7 @@ public class MainMenuScreen implements Screen, ActionListener {
 
         Button trailsLeft = new Button("", menuFont);
         trailsLeft.setTexture(settingsButtonTexture);
-        trailsLeft.setWidth(SETTINGS_SIDE_DIMENSION);
+        trailsLeft.setWidth(-SETTINGS_SIDE_DIMENSION);
         trailsLeft.setHeight(SETTINGS_SIDE_DIMENSION);
         trailsLeft.setX(SETTINGS_LEFT_X);
         trailsLeft.setY(SETTINGS_TRAILS_EDIT_Y);
@@ -407,7 +422,7 @@ public class MainMenuScreen implements Screen, ActionListener {
 
         Button trailsRight = new Button("", menuFont);
         trailsRight.setTexture(settingsButtonTexture);
-        trailsRight.setWidth(SETTINGS_SIDE_DIMENSION);
+        trailsRight.setWidth(-SETTINGS_SIDE_DIMENSION);
         trailsRight.setHeight(SETTINGS_SIDE_DIMENSION);
         trailsRight.setX(SETTINGS_RIGHT_X);
         trailsRight.setY(SETTINGS_TRAILS_EDIT_Y);

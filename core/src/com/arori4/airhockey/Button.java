@@ -41,22 +41,22 @@ public class Button extends TextBox implements Pressable{
      * @param context - SpriteBatch to draw with
      */
     public void draw(SpriteBatch context, float parentX, float parentY){
-//        //draw the new image if pressed
-//        if (mIsPressed){
-//            if (mPressedTexture != null){
-//                //set color to opaque
-//                context.setColor(Color.OPAQUE);
-//                context.draw(mPressedTexture, getX() + parentX, getY() + parentY,
-//                        getWidth(), getHeight());
-//            } else{
-//                System.err.println("ERROR: Button with action command " + mActionCommand + " does " +
-//                        "not have a background texture.");
-//            }
-//        }
-
-        //TODO: this will cover the other image, but must be here
-        super.draw(context, parentX, parentY);
-
+        //draw the new image if pressed. switch the textures
+        if (mIsPressed){
+            if (mPressedTexture != null){
+                Texture oldTexture = getTexture();
+                setTexture(getPressedTexture());
+                super.draw(context, parentX, parentY);
+                setTexture(oldTexture);
+            } else{
+                System.err.println("ERROR: Button with action command " + mActionCommand + " does " +
+                        "not have a background texture.");
+            }
+        }
+        //if not pressed, then don't switch the textures
+        else{
+            super.draw(context, parentX, parentY);
+        }
     }
 
     /**
